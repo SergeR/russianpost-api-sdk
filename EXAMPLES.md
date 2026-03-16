@@ -2,43 +2,61 @@
 
 ## Creating an Order
 
+### Using Builder (Recommended)
+
 ```php
 use SergeR\RussianPostSDK\Client;
-use SergeR\RussianPostSDK\Domain\Order;
+use SergeR\RussianPostSDK\Domain\OrderBuilder;
 use SergeR\RussianPostSDK\Dto\Request\Address;
-use SergeR\RussianPostSDK\Enums\{MailType, MailCategory};
+use SergeR\RussianPostSDK\Enums\{MailType, MailCategory, AddressType};
 
 // Initialize client
 $client = new Client($config, $httpClient, $requestFactory, $streamFactory);
 
-// Create an order
-$order = new Order(
-    orderNum: 'ORDER-12345',
-    mailType: MailType::ONLINE_PARCEL,
-    mailCategory: MailCategory::SIMPLE,
-    mass: 1000, // grams
-    recipientName: 'John Doe',
-    givenName: 'John',
-    surname: 'Doe',
-    region: 'Moscow Oblast',
-    place: 'Moscow',
-    street: 'Lenin St',
-    house: '10',
-    addressTypeTo: 'DEFAULT',
-    fragile: false,
-    mailDirect: 0,
-    tariffCount: 1,
-    addressTo: new Address(
+// Create an order using fluent builder
+$order = OrderBuilder::create()
+    ->orderNum('ORDER-12345')
+    ->mailType(MailType::ONLINE_PARCEL)
+    ->mailCategory(MailCategory::SIMPLE)
+    ->mass(1000) // grams
+    ->recipient('Doe', 'John') // Sets recipientName, givenName, surname
+    ->region('Moscow Oblast')
+    ->place('Moscow')
+    ->street('Lenin St')
+    ->house('10')
+    ->addressTypeTo('DEFAULT')
+    ->addressTo(new Address(
         addressType: AddressType::DEFAULT,
         postcode: '119991'
-    ),
-);
+    ))
+    ->fragile(true)
+    ->phone('+7-999-123-45-67')
+    ->email('john@example.com')
+    ->declaredValue(50000) // kopecks
+    ->comment('Fragile electronics, handle with care')
+    ->build();
 
 // Send to API - returns Order with filled ID, barcode, etc
 $createdOrder = $client->orders()->create($order);
 
 echo $createdOrder->id;       // API-assigned ID
 echo $createdOrder->barcode;  // API-assigned barcode (ШПИ)
+```
+
+### Direct Constructor (for minimal orders)
+
+```php
+use SergeR\RussianPostSDK\Domain\Order;
+use SergeR\RussianPostSDK\Enums\{MailType, MailCategory};
+
+$order = new Order(
+    orderNum: 'ORDER-12345',
+    mailType: MailType::ONLINE_PARCEL,
+    mailCategory: MailCategory::SIMPLE,
+    mass: 1000,
+);
+
+$createdOrder = $client->orders()->create($order);
 ```
 
 ## Finding Orders
