@@ -1,0 +1,52 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://otpravka-api.pochta.ru/schemas/postoffice-services.json",
+  "title": "Почта России - Список сервисов почтовых отделений",
+  "description": "Схема ответа API для получения списка сервисов, доступных в почтовых отделениях",
+  "definitions": {
+    "response": {
+      "type": "array",
+      "description": "Массив сервисов почтовых отделений",
+      "items": {
+        "type": "object",
+        "description": "Информация о сервисе",
+        "required": [
+          "code",
+          "group-id",
+          "name"
+        ],
+        "properties": {
+          "code": {
+            "type": "string",
+            "description": "Код сервиса (например: 1.2)",
+            "examples": [
+              "1.2",
+              "2.1",
+              "3.5"
+            ]
+          },
+          "group-id": {
+            "type": "integer",
+            "description": "Внутренний идентификатор группы, которой принадлежит сервис",
+            "examples": [
+              0,
+              1,
+              2
+            ]
+          },
+          "name": {
+            "type": "string",
+            "description": "Описание сервиса",
+            "minLength": 1,
+            "examples": [
+              "Прием и выдача почтовых отправлений",
+              "Продажа конвертов и открыток"
+            ]
+          }
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "$ref": "#/definitions/response"
+}

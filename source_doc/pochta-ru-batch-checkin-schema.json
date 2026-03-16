@@ -1,0 +1,26 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "pochta-ru-batch-checkin-schema.json",
+  "title": "Pochta Russia Batch Checkin API Schema",
+  "description": "JSON Schema для API Почты России - метод batch checkin",
+  "definitions": {
+    "response": {
+      "type": "object",
+      "description": "Схема ответа API метода batch checkin",
+      "properties": {
+        "error-code": {
+          "type": "string",
+          "description": "Код ошибки",
+          "enum": [
+            "UNDEFINED"
+          ]
+        },
+        "f103-sent": {
+          "type": "boolean",
+          "description": "Отослана ли электронная версия ф103/ф103п в ОПС?"
+        }
+      },
+      "additionalProperties": false
+    }
+  }
+}

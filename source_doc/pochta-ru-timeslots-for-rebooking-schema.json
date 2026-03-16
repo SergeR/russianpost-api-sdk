@@ -1,0 +1,65 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "pochta-ru-timeslots-for-rebooking-schema.json",
+  "title": "Почта России - Схема таймслотов для перебронирования",
+  "description": "JSON Schema для ответа API Почты России с доступными слотами времени",
+  "definitions": {
+    "response": {
+      "type": "object",
+      "description": "Структура ответа API",
+      "required": [
+        "timeslots"
+      ],
+      "properties": {
+        "timeslots": {
+          "type": "array",
+          "description": "Список доступных слотов",
+          "items": {
+            "$ref": "#/definitions/timeslot"
+          }
+        }
+      }
+    },
+    "timeslot": {
+      "type": "object",
+      "description": "Временной слот",
+      "required": [
+        "id",
+        "date",
+        "beginTime",
+        "endTime",
+        "capacity"
+      ],
+      "properties": {
+        "id": {
+          "type": "integer",
+          "description": "Идентификатор"
+        },
+        "date": {
+          "type": "string",
+          "description": "Дата действия",
+          "format": "date",
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+          "example": "2023-02-06"
+        },
+        "beginTime": {
+          "type": "string",
+          "description": "Время с которого действует",
+          "pattern": "^([01]\\d|2[0-3]):[0-5]\\d$",
+          "example": "09:00"
+        },
+        "endTime": {
+          "type": "string",
+          "description": "Время до которого действует",
+          "pattern": "^([01]\\d|2[0-3]):[0-5]\\d$",
+          "example": "18:00"
+        },
+        "capacity": {
+          "type": "integer",
+          "description": "Емкость таймслота",
+          "minimum": 0
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,152 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://api.pochta.ru/schemas/clean-address.json",
+  "title": "Схема API нормализации адресов Почты России",
+  "description": "JSON Schema для запроса и ответа API нормализации/очистки адресов",
+  "definitions": {
+    "request": {
+      "type": "array",
+      "title": "Запрос на нормализацию адресов",
+      "description": "Массив адресов для нормализации",
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "original-address"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Идентификатор записи"
+          },
+          "original-address": {
+            "type": "string",
+            "description": "Оригинальные адрес одной строкой"
+          }
+        },
+        "additionalProperties": false
+      },
+      "minItems": 1
+    },
+    "response": {
+      "type": "array",
+      "title": "Ответ с нормализованными адресами",
+      "description": "Массив нормализованных адресов",
+      "items": {
+        "type": "object",
+        "required": [
+          "address-type",
+          "id",
+          "index",
+          "original-address",
+          "place",
+          "quality-code",
+          "region",
+          "validation-code"
+        ],
+        "properties": {
+          "address-type": {
+            "type": "string",
+            "description": "Тип адреса",
+            "enum": [
+              "DEFAULT"
+            ],
+            "default": "DEFAULT"
+          },
+          "area": {
+            "type": "string",
+            "description": "Район"
+          },
+          "building": {
+            "type": "string",
+            "description": "Часть здания: Строение"
+          },
+          "corpus": {
+            "type": "string",
+            "description": "Часть здания: Корпус"
+          },
+          "hotel": {
+            "type": "string",
+            "description": "Название гостиницы"
+          },
+          "house": {
+            "type": "string",
+            "description": "Часть адреса: Номер здания"
+          },
+          "id": {
+            "type": "string",
+            "description": "Идентификатор записи"
+          },
+          "index": {
+            "type": "string",
+            "description": "Почтовый индекс",
+            "pattern": "^[0-9]{6}$"
+          },
+          "letter": {
+            "type": "string",
+            "description": "Часть здания: Литера"
+          },
+          "location": {
+            "type": "string",
+            "description": "Микрорайон"
+          },
+          "num-address-type": {
+            "type": "string",
+            "description": "Номер для а/я, войсковая часть, войсковая часть ЮЯ, полевая почта"
+          },
+          "original-address": {
+            "type": "string",
+            "description": "Оригинальные адрес одной строкой"
+          },
+          "place": {
+            "type": "string",
+            "description": "Населенный пункт"
+          },
+          "quality-code": {
+            "type": "string",
+            "description": "Код качества нормализации адреса",
+            "enum": [
+              "GOOD",
+              "POSTAL_BOX",
+              "ON_DEMAND",
+              "UNDEF_05",
+              "UNDEF_04",
+              "NOT_USED_HOUSE",
+              "INCOMPLETE",
+              "ACT_INCOMPL"
+            ]
+          },
+          "region": {
+            "type": "string",
+            "description": "Область, регион"
+          },
+          "room": {
+            "type": "string",
+            "description": "Часть здания: Номер помещения"
+          },
+          "slash": {
+            "type": "string",
+            "description": "Часть здания: Дробь"
+          },
+          "street": {
+            "type": "string",
+            "description": "Часть адреса: Улица"
+          },
+          "validation-code": {
+            "type": "string",
+            "description": "Код проверки нормализации адреса",
+            "enum": [
+              "CONFIRMED_MANUALLY",
+              "VALIDATED",
+              "OVERRIDDEN",
+              "NOT_VALIDATED_HAS_MATCHES",
+              "NOT_VALIDATED_NO_MATCHES",
+              "NOT_VALIDATED_UNPARSED_PART"
+            ]
+          }
+        },
+        "additionalProperties": false
+      }
+    }
+  }
+}

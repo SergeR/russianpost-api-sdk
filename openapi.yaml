@@ -1,0 +1,4027 @@
+openapi: 3.1.0
+info:
+  title: Почта России — Отправка API
+  description: |
+    REST API Почты России для управления отправлениями, партиями, документами,
+    архивом, почтовыми отделениями, временными слотами, возвратами и утилитами.
+  version: '1.0'
+  contact:
+    name: Почта России
+    url: https://otpravka.pochta.ru
+
+servers:
+  - url: https://otpravka-api.pochta.ru
+    description: Production
+
+security:
+  - AccessToken: []
+    UserAuthorization: []
+
+tags:
+  - name: orders
+    description: Управление заказами (заказы в черновике)
+  - name: batches
+    description: Управление партиями (отправками)
+  - name: documents
+    description: Генерация документов и печатных форм
+  - name: archive
+    description: Архив партий
+  - name: post-offices
+    description: Поиск почтовых отделений
+  - name: time-slots
+    description: Управление временными слотами доставки
+  - name: returns
+    description: Управление возвратными отправлениями
+  - name: utility
+    description: Утилиты — нормализация данных, тарифы, настройки
+
+components:
+  securitySchemes:
+    AccessToken:
+      type: apiKey
+      in: header
+      name: Authorization
+      description: Токен доступа. Формат — "AccessToken <token>"
+    UserAuthorization:
+      type: apiKey
+      in: header
+      name: X-User-Authorization
+      description: Авторизация пользователя. Формат — "Basic <base64(login:password)>"
+
+  schemas:
+
+    LegacyError:
+      type: object
+      description: Объект ошибки в старом формате
+      properties:
+        error-code:
+          type: string
+          description: Код ошибки
+        error-details:
+          type: string
+          description: Подробности ошибки
+        position:
+          type: integer
+          description: Позиция в исходном массиве
+
+    LegacyErrorResponse:
+      type: array
+      description: Список ошибок в старом формате
+      items:
+        $ref: '#/components/schemas/LegacyError'
+
+    ExternalErrorResponse:
+      type: object
+      description: Ошибка во внешнем формате (timeslots, returns)
+      required:
+        - code
+        - message
+      properties:
+        code:
+          type: string
+          description: Текстовый идентификатор ошибки
+        message:
+          type: string
+          description: Подробное описание ошибки
+        errors:
+          type: array
+          description: Ошибки по отдельным полям
+          items:
+            type: object
+            required:
+              - field
+              - message
+            properties:
+              field:
+                type: string
+                description: Идентификатор поля
+              message:
+                type: string
+                description: Описание ошибки поля
+
+    Dimension:
+      type: object
+      description: Линейные размеры (сантиметры)
+      properties:
+        height:
+          type: integer
+          description: Высота (см)
+          minimum: 0
+        length:
+          type: integer
+          description: Длина (см)
+          minimum: 0
+        width:
+          type: integer
+          description: Ширина (см)
+          minimum: 0
+
+    Address:
+      type: object
+      description: Адрес
+      required:
+        - address-type
+        - index
+        - place
+        - region
+      properties:
+        address-type:
+          type: string
+          description: Тип адреса
+          enum:
+            - DEFAULT
+        area:
+          type: string
+          description: Район
+        building:
+          type: string
+          description: Часть здания — строение
+        corpus:
+          type: string
+          description: Часть здания — корпус
+        hotel:
+          type: string
+          description: Название гостиницы
+        house:
+          type: string
+          description: Номер здания
+        index:
+          type: string
+          description: Почтовый индекс
+          pattern: '^[0-9]{6}$'
+        letter:
+          type: string
+          description: Часть здания — литера
+        location:
+          type: string
+          description: Микрорайон
+        manual-address-input:
+          type: boolean
+          description: Признак ручного ввода адреса
+        num-address-type:
+          type: string
+          description: Номер для а/я, войсковая часть, полевая почта
+        office:
+          type: string
+          description: Часть здания — офис
+        place:
+          type: string
+          description: Населённый пункт
+        region:
+          type: string
+          description: Область, регион
+        room:
+          type: string
+          description: Часть здания — номер помещения
+        slash:
+          type: string
+          description: Часть здания — дробь
+        street:
+          type: string
+          description: Улица
+        vladenie:
+          type: string
+          description: Часть адреса — владение
+
+    CustomsEntry:
+      type: object
+      description: Позиция таможенной декларации
+      properties:
+        country-code:
+          type: integer
+          description: Код страны
+        description:
+          type: string
+          description: Описание товара
+        quantity:
+          type: integer
+          description: Количество
+        value:
+          type: integer
+          description: Стоимость (копейки)
+        weight:
+          type: integer
+          description: Вес (граммы)
+          minimum: 0
+
+    CustomsDeclaration:
+      type: object
+      description: Таможенная декларация
+      properties:
+        entries:
+          type: array
+          description: Позиции декларации
+          items:
+            $ref: '#/components/schemas/CustomsEntry'
+        currency:
+          type: string
+          description: Валюта
+
+    Rate:
+      type: object
+      description: Тариф с НДС
+      required:
+        - rate
+      properties:
+        rate:
+          type: integer
+          description: Тариф без НДС (копейки)
+          minimum: 0
+        vat:
+          type: integer
+          description: НДС (копейки)
+          minimum: 0
+
+    DeliveryTime:
+      type: object
+      description: Время доставки
+      properties:
+        max-days:
+          type: integer
+          description: Максимальное время доставки (дни)
+          minimum: 0
+        min-days:
+          type: integer
+          description: Минимальное время доставки (дни)
+          minimum: 0
+
+    OrderCreateItem:
+      type: object
+      description: Заказ для создания
+      required:
+        - address-type-to
+        - fragile
+        - given-name
+        - house-to
+        - mail-category
+        - mail-direct
+        - mail-type
+        - mass
+        - order-num
+        - place-to
+        - recipient-name
+        - region-to
+        - surname
+        - tariff-count
+      properties:
+        address-type-to:
+          type: string
+          description: Тип адреса получателя
+          enum:
+            - DEFAULT
+            - PO_BOX
+            - UNIT
+            - UNIT_SOUTH
+            - FIELD_POST
+        area-to:
+          type: string
+          description: Район получателя
+        building-to:
+          type: string
+          description: Строение получателя
+        completeness-checking:
+          type: boolean
+          description: Услуга проверки комплектности
+        contents-checking:
+          type: boolean
+          description: Услуга проверки вложения
+        corpus-to:
+          type: string
+          description: Корпус получателя
+        courier:
+          type: boolean
+          description: Курьерская доставка
+        customs-declaration:
+          $ref: '#/components/schemas/CustomsDeclaration'
+        declared-value:
+          type: integer
+          description: Объявленная ценность (копейки)
+          minimum: 0
+        delivery-point-index:
+          type: string
+          description: Индекс пункта выдачи заказов
+        dimension:
+          $ref: '#/components/schemas/Dimension'
+        dimension-type:
+          type: string
+          description: Типоразмер
+          enum:
+            - S
+            - M
+            - L
+            - XL
+        entries-type:
+          type: string
+          description: Категория вложения
+          enum:
+            - GIFT
+            - DOCUMENT
+            - SALE_OF_GOODS
+            - COMMERCIAL_SAMPLE
+            - OTHER
+        envelope-type:
+          type: string
+          description: Тип конверта
+          enum:
+            - C4
+            - C5
+            - C6
+            - DL
+        fragile:
+          type: boolean
+          description: Осторожно/Хрупкое/Терморежим
+        given-name:
+          type: string
+          description: Имя получателя
+        hotel-to:
+          type: string
+          description: Гостиница получателя
+        house-to:
+          type: string
+          description: Номер дома получателя
+        index-to:
+          type: string
+          description: Почтовый индекс получателя
+          pattern: '^[0-9]{6}$'
+        insr-value:
+          type: integer
+          description: Объявленная ценность страхования (копейки)
+          minimum: 0
+        inventory:
+          type: boolean
+          description: Опись вложения
+        letter-to:
+          type: string
+          description: Литера адреса получателя
+        location-to:
+          type: string
+          description: Микрорайон получателя
+        mail-category:
+          type: string
+          description: Категория РПО
+          enum:
+            - SIMPLE
+            - ORDERED
+            - ORDINARY
+            - WITH_DECLARED_VALUE
+            - WITH_DECLARED_VALUE_AND_CASH_ON_DELIVERY
+        mail-direct:
+          type: integer
+          description: Код страны назначения
+          minimum: 0
+        mail-type:
+          type: string
+          description: Вид РПО
+          enum:
+            - UNDEFINED
+            - POSTAL_PARCEL
+            - ONLINE_PARCEL
+            - ONLINE_COURIER
+            - LETTER
+            - BANDEROL
+            - BUSINESS_COURIER
+            - BUSINESS_COURIER_ES
+            - EMS
+            - EMS_OPTIMAL
+            - SMALL_PACKET
+        mass:
+          type: integer
+          description: Масса отправления (граммы)
+          minimum: 0
+        middle-name:
+          type: string
+          description: Отчество получателя
+        notice-payment-method:
+          type: string
+          description: Способ оплаты уведомления
+          enum:
+            - CASHLESS
+            - STAMP
+            - FRANKING
+        num-address-type-to:
+          type: string
+          description: Номер для а/я, войсковая часть
+        office-to:
+          type: string
+          description: Офис получателя
+        order-num:
+          type: string
+          description: Номер заказа (внешний идентификатор)
+        payment-method:
+          type: string
+          description: Способ оплаты
+          enum:
+            - CASHLESS
+            - STAMP
+            - FRANKING
+        place-to:
+          type: string
+          description: Населённый пункт получателя
+        postoffice-code:
+          type: string
+          description: Индекс ОПС
+        recipient-name:
+          type: string
+          description: Наименование получателя
+        region-to:
+          type: string
+          description: Область/регион получателя
+        room-to:
+          type: string
+          description: Номер помещения получателя
+        slash-to:
+          type: string
+          description: Дробь адреса получателя
+        sms-notice-recipient:
+          type: integer
+          description: Признак SMS-уведомления получателя
+          minimum: 0
+        street-to:
+          type: string
+          description: Улица получателя
+        surname:
+          type: string
+          description: Фамилия получателя
+        tariff-count:
+          type: integer
+          description: Количество по тарифу
+          minimum: 0
+        transport-type:
+          type: string
+          description: Вид транспортировки
+          enum:
+            - SURFACE
+            - AVIA
+            - COMBINED
+            - EXPRESS
+        vsd:
+          type: boolean
+          description: Возврат сопроводительных документов
+        with-electronic-notice:
+          type: boolean
+          description: С электронным уведомлением
+        with-order-of-notice:
+          type: boolean
+          description: С заказным уведомлением
+        with-simple-notice:
+          type: boolean
+          description: С простым уведомлением
+
+    OrderCreateRequest:
+      type: array
+      description: Массив заказов для создания
+      minItems: 1
+      items:
+        $ref: '#/components/schemas/OrderCreateItem'
+
+    OrderCreateResponse:
+      type: object
+      description: Результат создания заказов
+      properties:
+        errors:
+          type: array
+          description: Ошибки создания
+          items:
+            $ref: '#/components/schemas/LegacyError'
+        result-ids:
+          type: array
+          description: Идентификаторы созданных заказов
+          items:
+            type: integer
+
+    OrderCreateV2Response:
+      type: object
+      description: Результат создания заказов (V2)
+      properties:
+        errors:
+          type: array
+          description: Ошибки создания
+          items:
+            $ref: '#/components/schemas/LegacyError'
+        result-ids:
+          type: array
+          description: Идентификаторы созданных заказов
+          items:
+            type: integer
+        orders:
+          type: array
+          description: Созданные заказы с деталями
+          items:
+            type: object
+            properties:
+              barcode:
+                type: string
+                description: ШПИ
+              order-num:
+                type: string
+                description: Номер заказа
+              result-id:
+                type: integer
+                description: Идентификатор заказа
+              group-name:
+                type: string
+                description: Наименование группы
+
+    OrderEditRequest:
+      type: object
+      description: Данные для редактирования заказа
+      required:
+        - address-type-to
+        - given-name
+        - house-to
+        - mail-category
+        - mail-type
+        - mass
+        - order-num
+        - place-to
+        - postoffice-code
+        - recipient-name
+        - region-to
+        - street-to
+        - surname
+      properties:
+        address-type-to:
+          type: string
+          description: Тип адреса получателя
+          enum:
+            - DEFAULT
+            - PO_BOX
+            - UNIT
+            - UNIT_SOUTH
+            - FIELD_POST
+        area-to:
+          type: string
+          description: Район получателя
+        building-to:
+          type: string
+          description: Строение получателя
+        completeness-checking:
+          type: boolean
+          description: Услуга проверки комплектности
+        contents-checking:
+          type: boolean
+          description: Услуга проверки вложения
+        corpus-to:
+          type: string
+          description: Корпус получателя
+        courier:
+          type: boolean
+          description: Курьерская доставка
+        customs-declaration:
+          $ref: '#/components/schemas/CustomsDeclaration'
+        declared-value:
+          type: integer
+          description: Объявленная ценность (копейки)
+          minimum: 0
+        delivery-point-index:
+          type: string
+          description: Индекс пункта выдачи
+        dimension:
+          $ref: '#/components/schemas/Dimension'
+        dimension-type:
+          type: string
+          description: Типоразмер
+          enum:
+            - S
+            - M
+            - L
+            - XL
+        entries-type:
+          type: string
+          description: Категория вложения
+          enum:
+            - GIFT
+            - DOCUMENT
+            - SALE_OF_GOODS
+            - COMMERCIAL_SAMPLE
+            - OTHER
+        fragile:
+          type: boolean
+          description: Осторожно/Хрупкое/Терморежим
+        given-name:
+          type: string
+          description: Имя получателя
+        hotel-to:
+          type: string
+          description: Гостиница
+        house-to:
+          type: string
+          description: Номер дома
+        index-to:
+          type: string
+          description: Почтовый индекс получателя
+          pattern: '^[0-9]{6}$'
+        insr-value:
+          type: integer
+          description: Страховая ценность (копейки)
+          minimum: 0
+        inventory:
+          type: boolean
+          description: Опись вложения
+        letter-to:
+          type: string
+          description: Литера
+        location-to:
+          type: string
+          description: Микрорайон
+        mail-category:
+          type: string
+          description: Категория РПО
+          enum:
+            - SIMPLE
+            - ORDERED
+            - ORDINARY
+            - WITH_DECLARED_VALUE
+            - WITH_DECLARED_VALUE_AND_CASH_ON_DELIVERY
+        mail-direct:
+          type: integer
+          description: Код страны назначения
+          minimum: 0
+        mail-type:
+          type: string
+          description: Вид РПО
+          enum:
+            - UNDEFINED
+            - POSTAL_PARCEL
+            - ONLINE_PARCEL
+            - ONLINE_COURIER
+            - LETTER
+            - BANDEROL
+            - BUSINESS_COURIER
+            - BUSINESS_COURIER_ES
+            - EMS
+            - EMS_OPTIMAL
+            - SMALL_PACKET
+        mass:
+          type: integer
+          description: Масса (граммы)
+          minimum: 0
+        middle-name:
+          type: string
+          description: Отчество получателя
+        notice-payment-method:
+          type: string
+          description: Способ оплаты уведомления
+          enum:
+            - CASHLESS
+            - STAMP
+            - FRANKING
+        num-address-type-to:
+          type: string
+          description: Номер а/я или войсковой части
+        office-to:
+          type: string
+          description: Офис
+        order-num:
+          type: string
+          description: Номер заказа
+        payment-method:
+          type: string
+          description: Способ оплаты
+          enum:
+            - CASHLESS
+            - STAMP
+            - FRANKING
+        place-to:
+          type: string
+          description: Населённый пункт получателя
+        postoffice-code:
+          type: string
+          description: Индекс ОПС
+        recipient-name:
+          type: string
+          description: Наименование получателя
+        region-to:
+          type: string
+          description: Область/регион получателя
+        room-to:
+          type: string
+          description: Номер помещения
+        slash-to:
+          type: string
+          description: Дробь
+        sms-notice-recipient:
+          type: integer
+          description: SMS-уведомление получателю
+          minimum: 0
+        street-to:
+          type: string
+          description: Улица получателя
+        surname:
+          type: string
+          description: Фамилия получателя
+        transport-type:
+          type: string
+          description: Вид транспортировки
+          enum:
+            - SURFACE
+            - AVIA
+            - COMBINED
+            - EXPRESS
+        vsd:
+          type: boolean
+          description: Возврат сопроводительных документов
+        with-electronic-notice:
+          type: boolean
+          description: С электронным уведомлением
+        with-order-of-notice:
+          type: boolean
+          description: С заказным уведомлением
+        with-simple-notice:
+          type: boolean
+          description: С простым уведомлением
+
+    OrderDeleteRequest:
+      type: array
+      description: Список ID заказов для удаления
+      minItems: 1
+      items:
+        type: integer
+
+    OrderDeleteResponse:
+      type: object
+      description: Результат удаления заказов
+      properties:
+        errors:
+          type: array
+          description: Ошибки удаления
+          items:
+            $ref: '#/components/schemas/LegacyError'
+        result-ids:
+          type: array
+          description: ID удалённых заказов
+          items:
+            type: integer
+
+    OrderBackNewRequest:
+      type: array
+      description: Список ШПИ заказов для возврата в черновик
+      minItems: 1
+      items:
+        type: string
+
+    OrderBackNewResponse:
+      type: object
+      description: Результат возврата заказов в черновик
+      properties:
+        errors:
+          type: array
+          description: Ошибки
+          items:
+            $ref: '#/components/schemas/LegacyError'
+        result-ids:
+          type: array
+          description: ID заказов, возвращённых в черновик
+          items:
+            type: integer
+
+    OrderObject:
+      type: object
+      description: Заказ (полный объект)
+      properties:
+        address-type-from:
+          type: string
+          description: Тип адреса отправителя
+          enum:
+            - DEFAULT
+            - PO_BOX
+            - UNIT
+            - UNIT_SOUTH
+            - FIELD_POST
+        address-type-to:
+          type: string
+          description: Тип адреса получателя
+          enum:
+            - DEFAULT
+            - PO_BOX
+            - UNIT
+            - UNIT_SOUTH
+            - FIELD_POST
+        area-to:
+          type: string
+          description: Район получателя
+        avia-rate:
+          type: integer
+          description: Плата за авиа-пересылку (копейки)
+          minimum: 0
+        avia-rate-with-vat:
+          type: integer
+          description: Плата за авиа-пересылку с НДС (копейки)
+          minimum: 0
+        avia-rate-wo-vat:
+          type: integer
+          description: Плата за авиа-пересылку без НДС (копейки)
+          minimum: 0
+        barcode:
+          type: string
+          description: ШПИ
+        batch-name:
+          type: string
+          description: Наименование партии
+        batch-status:
+          type: string
+          description: Статус партии
+        building-to:
+          type: string
+          description: Строение получателя
+        completeness-checking:
+          type: boolean
+          description: Проверка комплектности
+        contents-checking:
+          type: boolean
+          description: Проверка вложения
+        corpus-to:
+          type: string
+          description: Корпус получателя
+        courier:
+          type: boolean
+          description: Курьерская доставка
+        customs-declaration:
+          $ref: '#/components/schemas/CustomsDeclaration'
+        declared-value:
+          type: integer
+          description: Объявленная ценность (копейки)
+          minimum: 0
+        delivery-point-index:
+          type: string
+          description: Индекс пункта выдачи
+        delivery-time:
+          $ref: '#/components/schemas/DeliveryTime'
+        dimension:
+          $ref: '#/components/schemas/Dimension'
+        dimension-type:
+          type: string
+          description: Типоразмер
+          enum:
+            - S
+            - M
+            - L
+            - XL
+        entries-type:
+          type: string
+          description: Категория вложения
+        fragile:
+          type: boolean
+          description: Осторожно/Хрупкое/Терморежим
+        given-name:
+          type: string
+          description: Имя получателя
+        ground-rate:
+          type: integer
+          description: Плата за пересылку (копейки)
+          minimum: 0
+        ground-rate-with-vat:
+          type: integer
+          description: Плата за пересылку с НДС (копейки)
+          minimum: 0
+        ground-rate-wo-vat:
+          type: integer
+          description: Плата за пересылку без НДС (копейки)
+          minimum: 0
+        house-to:
+          type: string
+          description: Номер дома получателя
+        id:
+          type: integer
+          description: Идентификатор заказа
+        index-to:
+          type: string
+          description: Почтовый индекс получателя
+        insr-rate:
+          type: integer
+          description: Плата за объявленную ценность (копейки)
+          minimum: 0
+        insr-rate-with-vat:
+          type: integer
+          description: Плата за объявленную ценность с НДС (копейки)
+          minimum: 0
+        insr-rate-wo-vat:
+          type: integer
+          description: Плата за объявленную ценность без НДС (копейки)
+          minimum: 0
+        insr-value:
+          type: integer
+          description: Страховая ценность (копейки)
+          minimum: 0
+        inventory:
+          type: boolean
+          description: Опись вложения
+        inventory-rate:
+          type: integer
+          description: Плата за опись вложения (копейки)
+          minimum: 0
+        inventory-rate-with-vat:
+          type: integer
+          description: Плата за опись с НДС (копейки)
+          minimum: 0
+        inventory-rate-wo-vat:
+          type: integer
+          description: Плата за опись без НДС (копейки)
+          minimum: 0
+        last-oper-attr:
+          type: integer
+          description: Атрибут последней операции
+        last-oper-date:
+          type: string
+          description: Дата последней операции
+        last-oper-type:
+          type: integer
+          description: Тип последней операции
+        letter-to:
+          type: string
+          description: Литера получателя
+        location-to:
+          type: string
+          description: Микрорайон получателя
+        mail-category:
+          type: string
+          description: Категория РПО
+          enum:
+            - SIMPLE
+            - ORDERED
+            - ORDINARY
+            - WITH_DECLARED_VALUE
+            - WITH_DECLARED_VALUE_AND_CASH_ON_DELIVERY
+        mail-direct:
+          type: integer
+          description: Код страны назначения
+          minimum: 0
+        mail-rank:
+          type: string
+          description: Разряд почтового отправления
+          enum:
+            - WO_RANK
+            - GOVERNMENTAL
+            - MILITARY
+        mail-type:
+          type: string
+          description: Вид РПО
+          enum:
+            - UNDEFINED
+            - POSTAL_PARCEL
+            - ONLINE_PARCEL
+            - ONLINE_COURIER
+            - LETTER
+            - BANDEROL
+            - BUSINESS_COURIER
+            - BUSINESS_COURIER_ES
+            - EMS
+            - EMS_OPTIMAL
+            - SMALL_PACKET
+            - LETTER_CLASS_1
+            - BANDEROL_CLASS_1
+            - PARCEL_CLASS_1
+            - VSD
+            - ECOM
+        mass:
+          type: integer
+          description: Масса (граммы)
+          minimum: 0
+        mass-rate:
+          type: integer
+          description: Плата по массе (копейки)
+          minimum: 0
+        mass-rate-with-vat:
+          type: integer
+          description: Плата по массе с НДС (копейки)
+          minimum: 0
+        mass-rate-wo-vat:
+          type: integer
+          description: Плата по массе без НДС (копейки)
+          minimum: 0
+        middle-name:
+          type: string
+          description: Отчество получателя
+        notice-payment-method:
+          type: string
+          description: Способ оплаты уведомления
+          enum:
+            - CASHLESS
+            - STAMP
+            - FRANKING
+        notice-rate:
+          type: integer
+          description: Надбавка за уведомление (копейки)
+          minimum: 0
+        notice-rate-with-vat:
+          type: integer
+          description: Надбавка за уведомление с НДС (копейки)
+          minimum: 0
+        notice-rate-wo-vat:
+          type: integer
+          description: Надбавка за уведомление без НДС (копейки)
+          minimum: 0
+        num-address-type-to:
+          type: string
+          description: Номер а/я или войсковой части
+        office-to:
+          type: string
+          description: Офис получателя
+        order-num:
+          type: string
+          description: Номер заказа
+        payment-method:
+          type: string
+          description: Способ оплаты
+          enum:
+            - CASHLESS
+            - STAMP
+            - FRANKING
+        place-to:
+          type: string
+          description: Населённый пункт получателя
+        postmarks:
+          type: array
+          description: Отметки
+          items:
+            type: string
+            enum:
+              - WITHOUT_MARK
+              - FRAGILE
+              - CARE
+              - THERMAL_MODE
+        postoffice-code:
+          type: string
+          description: Индекс ОПС
+        recipient-name:
+          type: string
+          description: Наименование получателя
+        region-to:
+          type: string
+          description: Область/регион получателя
+        room-to:
+          type: string
+          description: Номер помещения получателя
+        slash-to:
+          type: string
+          description: Дробь
+        sms-notice-recipient:
+          type: integer
+          description: SMS-уведомление получателю
+          minimum: 0
+        street-to:
+          type: string
+          description: Улица получателя
+        surname:
+          type: string
+          description: Фамилия получателя
+        tariff-count:
+          type: integer
+          description: Количество по тарифу
+          minimum: 0
+        total-rate:
+          type: integer
+          description: Итого (копейки)
+          minimum: 0
+        total-rate-with-vat:
+          type: integer
+          description: Итого с НДС (копейки)
+          minimum: 0
+        total-rate-wo-vat:
+          type: integer
+          description: Итого без НДС (копейки)
+          minimum: 0
+        transport-type:
+          type: string
+          description: Вид транспортировки
+          enum:
+            - SURFACE
+            - AIR
+            - COMBINED
+            - STANDARD
+        vsd:
+          type: boolean
+          description: Возврат сопроводительных документов
+        with-electronic-notice:
+          type: boolean
+          description: С электронным уведомлением
+        with-order-of-notice:
+          type: boolean
+          description: С заказным уведомлением
+        with-simple-notice:
+          type: boolean
+          description: С простым уведомлением
+
+    OrderSearchResponse:
+      type: array
+      description: Список заказов
+      items:
+        $ref: '#/components/schemas/OrderObject'
+
+    CreateShipmentRequest:
+      type: array
+      description: Список ID заказов для добавления в партию
+      minItems: 1
+      items:
+        type: integer
+
+    BatchObject:
+      type: object
+      description: Партия отправлений
+      properties:
+        batch-name:
+          type: string
+          description: Наименование партии
+        batch-status:
+          type: string
+          description: Статус партии
+          enum:
+            - CREATED
+            - SENT
+            - ACCEPTED
+            - CANCELLED
+            - RETURNED
+            - SENT_TO_POSTOFFICE
+            - ACCEPTED_AT_POSTOFFICE
+            - RETURNED_FROM_POSTOFFICE
+            - ARCHIVED
+        batch-status-date:
+          type: string
+          description: Дата изменения статуса
+          format: date-time
+        combined-batch-mail-types:
+          type: array
+          description: Виды РПО в составной партии
+          items:
+            type: string
+        courier:
+          type: boolean
+          description: Курьерская доставка
+        list-number-date:
+          type: string
+          description: Дата формирования списка Ф103
+          format: date
+        mail-category:
+          type: string
+          description: Категория РПО
+          enum:
+            - SIMPLE
+            - ORDERED
+            - ORDINARY
+            - WITH_DECLARED_VALUE
+            - WITH_DECLARED_VALUE_AND_CASH_ON_DELIVERY
+        mail-type:
+          type: string
+          description: Вид РПО
+          enum:
+            - UNDEFINED
+            - POSTAL_PARCEL
+            - ONLINE_PARCEL
+            - ONLINE_COURIER
+            - LETTER
+            - BANDEROL
+            - BUSINESS_COURIER
+            - BUSINESS_COURIER_ES
+            - EMS
+            - EMS_OPTIMAL
+            - SMALL_PACKET
+            - LETTER_CLASS_1
+            - BANDEROL_CLASS_1
+            - VGPO_CLASS_1
+            - PARCEL_CLASS_1
+        postoffice-code:
+          type: string
+          description: Индекс ОПС отправки
+        send-date:
+          type: string
+          description: Плановая дата сдачи
+          format: date
+        shipment-count:
+          type: integer
+          description: Количество отправлений
+          minimum: 0
+        shipment-mass:
+          type: integer
+          description: Общая масса (граммы)
+          minimum: 0
+        transport-type:
+          type: string
+          description: Вид транспортировки
+          enum:
+            - SURFACE
+            - AVIA
+            - COMBINED
+            - EXPRESS
+
+    CreateShipmentResponse:
+      type: object
+      description: Результат создания партии
+      properties:
+        batches:
+          type: array
+          description: Созданные партии
+          items:
+            $ref: '#/components/schemas/BatchObject'
+        errors:
+          type: array
+          description: Ошибки создания
+          items:
+            $ref: '#/components/schemas/LegacyError'
+        result-ids:
+          type: array
+          description: ID перенесённых заказов
+          items:
+            type: integer
+
+    BatchShipmentRequest:
+      type: array
+      description: Список ID заказов
+      minItems: 1
+      items:
+        type: integer
+
+    BatchShipmentResponse:
+      type: object
+      description: Результат операции с заказами в партии
+      properties:
+        errors:
+          type: array
+          description: Ошибки
+          items:
+            $ref: '#/components/schemas/LegacyError'
+        result-ids:
+          type: array
+          description: ID обработанных заказов
+          items:
+            type: integer
+
+    GetAllBatchesResponse:
+      type: array
+      description: Все партии
+      items:
+        $ref: '#/components/schemas/BatchObject'
+
+    ChangeShipmentDateResponse:
+      type: object
+      description: Результат изменения даты сдачи
+      additionalProperties: false
+      properties:
+        error-code:
+          type: string
+          description: Код ошибки
+        f103-sent:
+          type: boolean
+          description: Признак отправки Ф103
+
+    BatchCheckinResponse:
+      type: object
+      description: Результат сдачи партии в ОПС
+      additionalProperties: false
+      properties:
+        error-code:
+          type: string
+          description: Код ошибки
+        f103-sent:
+          type: boolean
+          description: Признак отправки Ф103
+
+    ShipmentAddRequest:
+      type: array
+      description: Заказы для добавления в партию
+      items:
+        $ref: '#/components/schemas/OrderCreateItem'
+
+    ShipmentAddResponse:
+      type: object
+      description: Результат добавления отправлений в партию
+      properties:
+        errors:
+          type: array
+          description: Ошибки добавления
+          items:
+            type: object
+            properties:
+              error-codes:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    code:
+                      type: string
+                    description:
+                      type: string
+                    details:
+                      type: string
+                    position:
+                      type: integer
+              position:
+                type: integer
+        result-ids:
+          type: array
+          description: ID добавленных отправлений
+          items:
+            type: integer
+
+    ListArchiveResponse:
+      type: array
+      description: Список партий в архиве
+      items:
+        $ref: '#/components/schemas/BatchObject'
+
+    PutArchiveRequest:
+      type: array
+      description: Наименования партий для помещения в архив
+      items:
+        type: string
+
+    PutArchiveResponseItem:
+      type: object
+      description: Результат помещения партии в архив
+      properties:
+        batch-name:
+          type: string
+          description: Наименование партии
+        error-code:
+          type: string
+          description: Код ошибки
+
+    PutArchiveResponse:
+      type: array
+      description: Результаты помещения партий в архив
+      items:
+        $ref: '#/components/schemas/PutArchiveResponseItem'
+
+    ArchiveRevertRequest:
+      type: array
+      description: Наименования партий для возврата из архива
+      minItems: 1
+      items:
+        type: string
+
+    ArchiveRevertResponse:
+      type: array
+      description: Наименования возвращённых из архива партий
+      items:
+        type: string
+
+    WorkingHours:
+      type: object
+      description: Время работы почтового отделения
+      properties:
+        lunches:
+          type: array
+          description: Перерывы
+          items:
+            type: object
+        weekday-id:
+          type: integer
+          description: Номер дня недели
+        weekday-name:
+          type: string
+          description: Название дня недели
+
+    Holiday:
+      type: object
+      description: Выходной день
+      properties:
+        date:
+          type: string
+          description: Дата
+        schedule:
+          $ref: '#/components/schemas/WorkingHours'
+
+    Phone:
+      type: object
+      description: Телефон почтового отделения
+      required:
+        - phone-number
+      properties:
+        is-fax:
+          type: boolean
+          description: Признак факса
+        phone-number:
+          type: string
+          description: Номер телефона
+        phone-town-code:
+          type: string
+          description: Код города
+        phone-type-name:
+          type: string
+          description: Тип номера
+
+    ServiceGroup:
+      type: object
+      description: Группа сервисов почтового отделения
+      properties:
+        group-id:
+          type: integer
+          description: Идентификатор группы
+        group-name:
+          type: string
+          description: Наименование группы
+
+    PostOfficeObject:
+      type: object
+      description: Информация о почтовом отделении
+      required:
+        - address-source
+        - latitude
+        - longitude
+        - postal-code
+        - type-code
+        - type-id
+      properties:
+        address-source:
+          type: string
+          description: Адрес отделения
+        current-day-working-hours:
+          $ref: '#/components/schemas/WorkingHours'
+        distance:
+          type: number
+          description: Расстояние до отделения
+        district:
+          type: string
+          description: Округ
+        holidays:
+          type: array
+          description: Выходные дни
+          items:
+            $ref: '#/components/schemas/Holiday'
+        is-closed:
+          type: boolean
+          description: Признак закрыто
+        is-private-category:
+          type: boolean
+          description: Внутреннее отделение
+        is-temporary-closed:
+          type: boolean
+          description: Временно закрыто
+        latitude:
+          type: number
+          description: Широта
+        longitude:
+          type: number
+          description: Долгота
+        nearest-office-postalcode:
+          type: string
+          description: Индекс ближайшего ОПС
+        nearest-postoffice:
+          $ref: '#/components/schemas/PostOfficeObject'
+        next-day-working-hours:
+          $ref: '#/components/schemas/WorkingHours'
+        phones:
+          type: array
+          description: Телефоны
+          items:
+            $ref: '#/components/schemas/Phone'
+        postal-code:
+          type: string
+          description: Индекс ОПС
+        prescribed:
+          type: boolean
+          description: Предписанный
+        region:
+          type: string
+          description: Область, край
+        service-groups:
+          type: array
+          description: Группы сервисов
+          items:
+            $ref: '#/components/schemas/ServiceGroup'
+        settlement:
+          type: string
+          description: Поселение
+        temporary-closed-reason:
+          type: string
+          description: Причина временного закрытия
+        type-code:
+          type: string
+          description: Тип отделения
+        type-id:
+          type: integer
+          description: Идентификатор типа отделения
+        ufps-code:
+          type: string
+          description: Код ЮФПС
+        working-hours:
+          type: array
+          description: Рабочие часы
+          items:
+            $ref: '#/components/schemas/WorkingHours'
+        works-on-saturdays:
+          type: boolean
+          description: Работает в субботу
+        works-on-sundays:
+          type: boolean
+          description: Работает в воскресенье
+
+    PostOfficeByAddressResponse:
+      type: object
+      description: Результат поиска ОПС по адресу
+      required:
+        - is-matched
+        - postoffices
+      additionalProperties: false
+      properties:
+        is-matched:
+          type: boolean
+          description: Переданный адрес совпадает с адресом первого ОПС в списке
+        postoffices:
+          type: array
+          description: Почтовые индексы найденных ОПС (по релевантности)
+          items:
+            type: string
+
+    PostOfficeServiceItem:
+      type: object
+      description: Сервис почтового отделения
+      required:
+        - code
+        - group-id
+        - name
+      additionalProperties: false
+      properties:
+        code:
+          type: string
+          description: Код сервиса (например 1.2)
+        group-id:
+          type: integer
+          description: Идентификатор группы сервиса
+        name:
+          type: string
+          description: Описание сервиса
+          minLength: 1
+
+    PostOfficeServicesResponse:
+      type: array
+      description: Список сервисов почтовых отделений
+      items:
+        $ref: '#/components/schemas/PostOfficeServiceItem'
+
+    PostOfficeNearbyResponse:
+      type: array
+      description: Список ближайших почтовых отделений
+      items:
+        $ref: '#/components/schemas/PostOfficeObject'
+
+    PostOfficeSettlementCodesResponse:
+      type: array
+      description: Почтовые индексы населённых пунктов
+      items:
+        type: string
+        pattern: '^[0-9]{6}$'
+        minLength: 6
+        maxLength: 6
+
+    Timeslot:
+      type: object
+      description: Временной слот доставки
+      required:
+        - id
+        - date
+        - beginTime
+        - endTime
+        - capacity
+      properties:
+        id:
+          type: integer
+          description: Идентификатор слота
+        date:
+          type: string
+          description: Дата
+          format: date
+          pattern: '^\d{4}-\d{2}-\d{2}$'
+        beginTime:
+          type: string
+          description: Время начала (например 09:00)
+          pattern: '^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$'
+        endTime:
+          type: string
+          description: Время окончания (например 18:00)
+          pattern: '^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$'
+        capacity:
+          type: integer
+          description: Ёмкость слота
+          minimum: 0
+
+    TimeslotsResponse:
+      type: object
+      description: Доступные временные слоты
+      required:
+        - uuid
+        - timeslots
+      properties:
+        uuid:
+          type: string
+          format: uuid
+          description: UUID предварительного бронирования
+        timeslots:
+          type: array
+          description: Список доступных слотов
+          items:
+            $ref: '#/components/schemas/Timeslot'
+
+    TimeslotsForRebookingResponse:
+      type: object
+      description: Временные слоты для перебронирования
+      required:
+        - timeslots
+      properties:
+        timeslots:
+          type: array
+          description: Список доступных слотов
+          items:
+            $ref: '#/components/schemas/Timeslot'
+
+    TimeslotBookingRequest:
+      type: object
+      description: Запрос на бронирование временного слота
+      required:
+        - uuid
+        - timeslotId
+        - phone
+        - postIndexFrom
+        - postIndexTo
+        - contractNumber
+        - plannedShippingDate
+        - address
+        - workTypeCode
+        - mailTypeCode
+        - mailCtgCode
+      additionalProperties: false
+      properties:
+        uuid:
+          type: string
+          format: uuid
+          description: UUID предварительного бронирования
+        timeslotId:
+          type: integer
+          description: Идентификатор временного слота
+        contactName:
+          type: string
+          description: Имя контактного лица (до 200 символов)
+          maxLength: 200
+        phone:
+          type: string
+          description: Телефон получателя (до 50 символов)
+          maxLength: 50
+        postIndexFrom:
+          type: string
+          description: Почтовый индекс отправителя
+          pattern: '^[0-9]{6}$'
+          minLength: 6
+          maxLength: 6
+        postIndexTo:
+          type: string
+          description: Почтовый индекс получателя
+          pattern: '^[0-9]{6}$'
+          minLength: 6
+          maxLength: 6
+        contractNumber:
+          type: string
+          description: Номер договора (до 50 символов)
+          maxLength: 50
+        plannedShippingDate:
+          type: string
+          description: Плановая дата отправки (yyyy-MM-dd)
+          format: date
+          pattern: '^[0-9]{4}-[0-9]{2}-[0-9]{2}$'
+        address:
+          type: string
+          description: Адрес получателя (до 255 символов)
+          maxLength: 255
+        workTypeCode:
+          type: string
+          description: Код типа работ
+          enum:
+            - delivery
+        mailTypeCode:
+          type: integer
+          description: Код типа отправления
+        mailCtgCode:
+          type: integer
+          description: Код категории отправления
+
+    TimeslotPutBookingRequest:
+      type: object
+      description: Запрос на уточнение бронирования (привязка ШПИ к UUID)
+      required:
+        - barcode
+        - contractNumber
+      additionalProperties: false
+      properties:
+        barcode:
+          type: string
+          description: ШПИ отправления (13-50 символов)
+          minLength: 13
+          maxLength: 50
+        contractNumber:
+          type: string
+          description: Номер договора (до 50 символов)
+          maxLength: 50
+
+    TimeslotRebookingRequest:
+      type: object
+      description: Запрос на перебронирование временного слота
+      required:
+        - uuidOrBarcode
+        - timeslotId
+        - contractNumber
+        - plannedShippingDate
+      additionalProperties: false
+      properties:
+        uuidOrBarcode:
+          type: string
+          description: UUID предварительного бронирования или ШПИ
+          maxLength: 50
+        timeslotId:
+          type: integer
+          description: Идентификатор временного слота
+        contractNumber:
+          type: string
+          description: Номер договора
+          maxLength: 50
+        plannedShippingDate:
+          type: string
+          description: Плановая дата (yyyy-MM-dd)
+          pattern: '^\d{4}-\d{2}-\d{2}$'
+
+    ReturnCreateRequest:
+      type: object
+      description: Запрос на создание возврата по прямому ШПИ
+      required:
+        - direct-barcode
+        - mail-type
+      additionalProperties: false
+      properties:
+        direct-barcode:
+          type: string
+          description: ШПИ прямого отправления
+        mail-type:
+          type: string
+          description: Вид РПО
+          default: UNDEFINED
+          enum:
+            - UNDEFINED
+            - POSTAL_PARCEL
+            - ONLINE_PARCEL
+            - ONLINE_COURIER
+            - EMS
+            - EMS_OPTIMAL
+            - LETTER
+            - LETTER_CLASS_1
+            - BANDEROL
+            - BUSINESS_COURIER
+            - BUSINESS_COURIER_ES
+            - PARCEL_CLASS_1
+            - BANDEROL_CLASS_1
+            - VSD
+            - ECOM
+
+    ReturnCreateResponse:
+      type: object
+      description: Результат создания возврата
+      additionalProperties: false
+      properties:
+        errors:
+          type: array
+          description: Ошибки создания
+          items:
+            type: object
+            required:
+              - code
+              - description
+            additionalProperties: false
+            properties:
+              code:
+                type: string
+                description: Код ошибки
+                enum:
+                  - DIRECT_SHIPMENT_NOT_FOUND
+                  - INVALID_MAIL_TYPE
+                  - ALREADY_EXISTS
+                  - INVALID_BARCODE
+                  - SHIPMENT_NOT_DELIVERED
+                  - RETURN_NOT_ALLOWED
+                  - INTERNAL_ERROR
+              description:
+                type: string
+                description: Описание ошибки
+        return-barcode:
+          type: string
+          description: ШПИ возвратного отправления
+
+    ReturnWithoutDirectRequest:
+      type: array
+      description: Массив возвратных отправлений без привязки к прямому ШПИ
+      items:
+        type: object
+        required:
+          - address-from
+          - mail-type
+          - recipient-name
+          - sender-name
+        properties:
+          address-from:
+            $ref: '#/components/schemas/Address'
+          address-to:
+            $ref: '#/components/schemas/Address'
+          insr-value:
+            type: integer
+            description: Объявленная ценность (копейки)
+            minimum: 0
+          mail-type:
+            type: string
+            description: Вид РПО
+            enum:
+              - UNDEFINED
+          order-num:
+            type: string
+            description: Номер заказа
+          postoffice-code:
+            type: string
+            description: Индекс ОПС
+          recipient-name:
+            type: string
+            description: Наименование получателя
+          sender-name:
+            type: string
+            description: Наименование отправителя
+
+    ReturnWithoutDirectResponse:
+      type: array
+      description: Результаты создания возвратных отправлений
+      items:
+        type: object
+        required:
+          - position
+        properties:
+          errors:
+            type: array
+            description: Ошибки
+            items:
+              type: object
+              required:
+                - code
+                - description
+              properties:
+                code:
+                  type: string
+                  description: Код ошибки
+                  enum:
+                    - DIRECT_SHIPMENT_NOT_FOUND
+                description:
+                  type: string
+                  description: Описание ошибки
+          position:
+            type: integer
+            description: Индекс в исходном массиве
+            minimum: 0
+          return-barcode:
+            type: string
+            description: ШПИ возвратного отправления
+
+    DeleteSeparateReturnErrorResponse:
+      type: object
+      description: Ответ при ошибке удаления возврата
+      required:
+        - code
+        - description
+      additionalProperties: false
+      properties:
+        code:
+          type: string
+          description: Код ошибки
+          enum:
+            - RETURN_SHIPMENT_NOT_FOUND
+        description:
+          type: string
+          description: Описание ошибки
+
+    ReturnsPostRequest:
+      type: object
+      description: Запрос на редактирование возвратного отправления
+      properties:
+        address-from:
+          $ref: '#/components/schemas/Address'
+        address-to:
+          $ref: '#/components/schemas/Address'
+        insr-value:
+          type: integer
+          description: Объявленная ценность (копейки)
+          minimum: 0
+        order-num:
+          type: string
+          description: Номер заказа
+        postoffice-code:
+          type: string
+          description: Индекс ОПС
+          pattern: '^[0-9]{6}$'
+        recipient-name:
+          type: string
+          description: Наименование получателя
+        sender-name:
+          type: string
+          description: Наименование отправителя
+
+    ReturnsPostResponse:
+      type: object
+      description: Результат редактирования возвратного отправления
+      properties:
+        errors:
+          type: array
+          description: Ошибки
+          items:
+            type: object
+            required:
+              - code
+              - description
+            properties:
+              code:
+                type: string
+                description: Код ошибки
+                enum:
+                  - DIRECT_SHIPMENT_NOT_FOUND
+              description:
+                type: string
+                description: Описание ошибки
+
+    CleanAddressRequest:
+      type: array
+      description: Адреса для нормализации
+      minItems: 1
+      items:
+        type: object
+        required:
+          - id
+          - original-address
+        additionalProperties: false
+        properties:
+          id:
+            type: string
+            description: Идентификатор записи
+          original-address:
+            type: string
+            description: Оригинальный адрес одной строкой
+
+    CleanAddressResponse:
+      type: array
+      description: Нормализованные адреса
+      items:
+        type: object
+        required:
+          - address-type
+          - id
+          - index
+          - original-address
+          - place
+          - quality-code
+          - region
+          - validation-code
+        additionalProperties: false
+        properties:
+          address-type:
+            type: string
+            description: Тип адреса
+            enum:
+              - DEFAULT
+            default: DEFAULT
+          area:
+            type: string
+            description: Район
+          building:
+            type: string
+            description: Строение
+          corpus:
+            type: string
+            description: Корпус
+          hotel:
+            type: string
+            description: Гостиница
+          house:
+            type: string
+            description: Номер здания
+          id:
+            type: string
+            description: Идентификатор записи
+          index:
+            type: string
+            description: Почтовый индекс
+            pattern: '^[0-9]{6}$'
+          letter:
+            type: string
+            description: Литера
+          location:
+            type: string
+            description: Микрорайон
+          num-address-type:
+            type: string
+            description: Номер для а/я, войсковая часть
+          original-address:
+            type: string
+            description: Оригинальный адрес одной строкой
+          place:
+            type: string
+            description: Населённый пункт
+          quality-code:
+            type: string
+            description: Код качества нормализации адреса
+            enum:
+              - GOOD
+              - POSTAL_BOX
+              - ON_DEMAND
+              - UNDEF_05
+              - UNDEF_04
+              - NOT_USED_HOUSE
+              - INCOMPLETE
+              - ACT_INCOMPL
+          region:
+            type: string
+            description: Область, регион
+          room:
+            type: string
+            description: Номер помещения
+          slash:
+            type: string
+            description: Дробь
+          street:
+            type: string
+            description: Улица
+          validation-code:
+            type: string
+            description: Код проверки нормализации
+            enum:
+              - CONFIRMED_MANUALLY
+              - VALIDATED
+              - OVERRIDDEN
+              - NOT_VALIDATED_HAS_MATCHES
+              - NOT_VALIDATED_NO_MATCHES
+              - NOT_VALIDATED_UNPARSED_PART
+
+    CleanPhysicalRequest:
+      type: array
+      description: Данные ФИО для нормализации
+      items:
+        type: object
+        required:
+          - id
+          - original-fio
+        additionalProperties: false
+        properties:
+          id:
+            type: string
+            description: Идентификатор записи
+          original-fio:
+            type: string
+            description: Оригинальные ФИО одной строкой
+
+    CleanPhysicalResponse:
+      type: array
+      description: Нормализованные ФИО
+      items:
+        type: object
+        required:
+          - id
+          - original-fio
+          - quality-code
+          - valid
+        additionalProperties: false
+        properties:
+          id:
+            type: string
+            description: Идентификатор записи
+          middle-name:
+            type: string
+            description: Отчество
+          name:
+            type: string
+            description: Имя
+          original-fio:
+            type: string
+            description: Оригинальные ФИО одной строкой
+          quality-code:
+            type: string
+            description: Код качества нормализации ФИО
+            enum:
+              - CONFIRMED_MANUALLY
+              - CONFIRMED
+              - NOT_CONFIRMED_AUTO
+              - NOT_CONFIRMED_MANUALLY
+          surname:
+            type: string
+            description: Фамилия
+          valid:
+            type: boolean
+            description: Качество нормализации приемлемое
+
+    CleanPhoneRequest:
+      type: array
+      description: Телефоны для нормализации
+      minItems: 1
+      items:
+        type: object
+        required:
+          - id
+          - original-phone
+        additionalProperties: false
+        properties:
+          area:
+            type: string
+            description: Область/край
+          id:
+            type: string
+            description: Идентификатор записи
+          original-phone:
+            type: string
+            description: Оригинальный номер одной строкой
+          place:
+            type: string
+            description: Город
+          region:
+            type: string
+            description: Регион
+
+    CleanPhoneResponse:
+      type: array
+      description: Нормализованные телефоны
+      items:
+        type: object
+        required:
+          - id
+          - original-phone
+          - phone-city-code
+          - phone-country-code
+          - phone-extension
+          - phone-number
+          - quality-code
+        additionalProperties: false
+        properties:
+          id:
+            type: string
+            description: Идентификатор записи
+          original-phone:
+            type: string
+            description: Оригинальный номер одной строкой
+          phone-city-code:
+            type: string
+            description: Код города
+          phone-country-code:
+            type: string
+            description: Код страны
+          phone-extension:
+            type: string
+            description: Добавочный номер
+          phone-number:
+            type: string
+            description: Номер телефона
+          quality-code:
+            type: string
+            description: Код качества нормализации
+            enum:
+              - CONFIRMED_MANUALLY
+              - CONFIRMED
+              - NOT_CONFIRMED
+              - UNKNOWN
+
+    TariffRequest:
+      type: object
+      description: Запрос расчёта тарифа
+      required:
+        - entries-type
+        - inventory
+        - mail-category
+        - mail-type
+        - mass
+        - with-order-of-notice
+        - with-simple-notice
+      properties:
+        completeness-checking:
+          type: boolean
+          description: Проверка комплектности
+        contents-checking:
+          type: boolean
+          description: Проверка вложения
+        courier:
+          type: boolean
+          description: Курьер
+        declared-value:
+          type: integer
+          description: Объявленная ценность
+          minimum: 0
+        delivery-point-index:
+          type: string
+          description: Идентификатор пункта выдачи заказов
+        dimension:
+          $ref: '#/components/schemas/Dimension'
+        dimension-type:
+          type: string
+          description: Типоразмер
+          enum:
+            - S
+            - M
+            - L
+            - XL
+        entries-type:
+          type: string
+          description: Категория вложения
+          enum:
+            - GIFT
+            - DOCUMENT
+            - SALE_OF_GOODS
+            - COMMERCIAL_SAMPLE
+            - OTHER
+        fragile:
+          type: boolean
+          description: Осторожно/Хрупкое/Терморежим
+        index-from:
+          type: string
+          description: Индекс ОПС места приёма
+          pattern: '^[0-9]{6}$'
+        index-to:
+          type: string
+          description: Индекс ОПС места назначения
+          pattern: '^[0-9]{6}$'
+        inventory:
+          type: boolean
+          description: Опись вложения
+        mail-category:
+          type: string
+          description: Категория РПО
+          enum:
+            - SIMPLE
+            - ORDERED
+            - ORDINARY
+            - WITH_DECLARED_VALUE
+            - WITH_DECLARED_VALUE_AND_CASH_ON_DELIVERY
+        mail-direct:
+          type: integer
+          description: Код страны назначения
+          minimum: 0
+        mail-type:
+          type: string
+          description: Вид РПО
+          enum:
+            - UNDEFINED
+            - POSTAL_PARCEL
+            - ONLINE_PARCEL
+            - ONLINE_COURIER
+            - LETTER
+            - BANDEROL
+            - BUSINESS_COURIER
+            - BUSINESS_COURIER_ES
+            - EMS
+            - EMS_OPTIMAL
+            - SMALL_PACKET
+        mass:
+          type: integer
+          description: Масса (граммы)
+          minimum: 0
+        notice-payment-method:
+          type: string
+          description: Способ оплаты уведомления
+          enum:
+            - CASHLESS
+            - STAMP
+            - FRANKING
+        payment-method:
+          type: string
+          description: Способ оплаты
+          enum:
+            - CASHLESS
+            - STAMP
+            - FRANKING
+        sms-notice-recipient:
+          type: integer
+          description: SMS-уведомление получателю
+          minimum: 0
+        transport-type:
+          type: string
+          description: Вид транспортировки
+          enum:
+            - SURFACE
+            - AVIA
+            - COMBINED
+            - EXPRESS
+        vsd:
+          type: boolean
+          description: Возврат сопроводительных документов
+        with-electronic-notice:
+          type: boolean
+          description: С электронным уведомлением
+        with-order-of-notice:
+          type: boolean
+          description: С заказным уведомлением
+        with-simple-notice:
+          type: boolean
+          description: С простым уведомлением
+
+    TariffResponse:
+      type: object
+      description: Ответ с расчётом тарифа
+      required:
+        - inventory-rate
+        - total-rate
+        - total-vat
+        - vsd-rate
+      properties:
+        avia-rate:
+          $ref: '#/components/schemas/Rate'
+        completeness-checking-rate:
+          $ref: '#/components/schemas/Rate'
+        contents-checking-rate:
+          $ref: '#/components/schemas/Rate'
+        delivery-time:
+          $ref: '#/components/schemas/DeliveryTime'
+        fragile-rate:
+          $ref: '#/components/schemas/Rate'
+        ground-rate:
+          $ref: '#/components/schemas/Rate'
+        insurance-rate:
+          $ref: '#/components/schemas/Rate'
+        inventory-rate:
+          $ref: '#/components/schemas/Rate'
+        notice-payment-method:
+          type: string
+          description: Способ оплаты уведомления
+          enum:
+            - CASHLESS
+            - STAMP
+            - FRANKING
+        notice-rate:
+          $ref: '#/components/schemas/Rate'
+        oversize-rate:
+          $ref: '#/components/schemas/Rate'
+        payment-method:
+          type: string
+          description: Способ оплаты
+          enum:
+            - CASHLESS
+            - STAMP
+            - FRANKING
+        sms-notice-recipient-rate:
+          $ref: '#/components/schemas/Rate'
+        total-rate:
+          type: integer
+          description: Итого (копейки)
+          minimum: 0
+        total-vat:
+          type: integer
+          description: Всего НДС (копейки)
+          minimum: 0
+        vsd-rate:
+          $ref: '#/components/schemas/Rate'
+
+    SettingsLimitResponse:
+      type: object
+      description: Лимиты запросов клиента
+      required:
+        - allowed-count
+        - current-count
+      additionalProperties: false
+      properties:
+        allowed-count:
+          type: integer
+          description: Разрешённое количество запросов
+          minimum: 0
+        current-count:
+          type: integer
+          description: Текущее количество запросов
+          minimum: 0
+
+    UserShippingPointItem:
+      type: object
+      description: Точка сдачи отправлений
+      required:
+        - operator-postcode
+      additionalProperties: false
+      properties:
+        enabled:
+          type: boolean
+          description: Активна
+        operator-postcode:
+          type: string
+          description: Индекс ОПС обслуживания
+        ops-address:
+          type: string
+          description: Адрес ОПС
+
+    UserShippingPointsResponse:
+      type: array
+      description: Точки сдачи пользователя
+      items:
+        $ref: '#/components/schemas/UserShippingPointItem'
+
+  responses:
+    BadRequest:
+      description: Некорректный запрос
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ExternalErrorResponse'
+    Unauthorized:
+      description: Не авторизован
+    Forbidden:
+      description: Доступ запрещён
+    NotFound:
+      description: Ресурс не найден
+    UnprocessableEntity:
+      description: Ошибки валидации
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/LegacyErrorResponse'
+    BinaryPdf:
+      description: PDF-документ
+      content:
+        application/pdf:
+          schema:
+            type: string
+            format: binary
+    BinaryZip:
+      description: ZIP-архив с документами
+      content:
+        application/zip:
+          schema:
+            type: string
+            format: binary
+    BinaryOctetStream:
+      description: Бинарный файл
+      content:
+        application/octet-stream:
+          schema:
+            type: string
+            format: binary
+
+paths:
+
+  /1.0/user/backlog:
+    put:
+      tags:
+        - orders
+      summary: Создать заказы (V1)
+      description: Creates one or more orders in the backlog (draft state). Returns created order IDs and any errors.
+      operationId: createOrders
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OrderCreateRequest'
+      responses:
+        '200':
+          description: Заказы созданы
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrderCreateResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /2.0/user/backlog:
+    put:
+      tags:
+        - orders
+      summary: Создать заказы (V2)
+      description: Creates one or more orders in the backlog using the V2 schema with extended response including barcodes and group info.
+      operationId: createOrdersV2
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OrderCreateRequest'
+      responses:
+        '200':
+          description: Заказы созданы (V2)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrderCreateV2Response'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /1.0/backlog:
+    get:
+      tags:
+        - orders
+      summary: Найти заказы в черновике
+      description: Returns a list of orders currently in the backlog, optionally filtered by search query with pagination.
+      operationId: searchOrders
+      parameters:
+        - name: query
+          in: query
+          description: Строка поиска
+          schema:
+            type: string
+        - name: size
+          in: query
+          description: Количество записей на странице
+          schema:
+            type: integer
+        - name: page
+          in: query
+          description: Номер страницы (начиная с 0)
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Список заказов
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrderSearchResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /1.0/backlog/{id}:
+    get:
+      tags:
+        - orders
+      summary: Найти заказ по ID
+      description: Returns a single order from the backlog by its internal identifier.
+      operationId: getOrderById
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Идентификатор заказа
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Заказ
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrderObject'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    post:
+      tags:
+        - orders
+      summary: Редактировать заказ
+      description: Updates an existing draft order by its ID with new recipient, mail, and service data.
+      operationId: editOrder
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Идентификатор заказа
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OrderEditRequest'
+      responses:
+        '200':
+          description: Заказ обновлён
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /1.0/backlog/delete:
+    delete:
+      tags:
+        - orders
+      summary: Удалить заказы из черновика
+      description: Deletes one or more draft orders by their IDs.
+      operationId: deleteOrders
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OrderDeleteRequest'
+      responses:
+        '200':
+          description: Результат удаления
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrderDeleteResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /1.0/backlog/backnew:
+    post:
+      tags:
+        - orders
+      summary: Вернуть заказы в черновик
+      description: Moves orders back to the backlog (draft) state by their barcodes (ШПИ).
+      operationId: returnOrdersToBacklog
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OrderBackNewRequest'
+      responses:
+        '200':
+          description: Результат возврата
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrderBackNewResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /1.0/backlog/group/{group-name}:
+    get:
+      tags:
+        - orders
+      summary: Найти заказы черновика по группе
+      description: Returns orders in the backlog belonging to a specific group name.
+      operationId: searchOrdersByGroup
+      parameters:
+        - name: group-name
+          in: path
+          required: true
+          description: Наименование группы
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Список заказов группы
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrderSearchResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /1.0/user/shipment:
+    put:
+      tags:
+        - batches
+      summary: Создать партию из заказов
+      description: Creates a new batch (shipment) from the given order IDs, moving them out of the backlog.
+      operationId: createShipment
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateShipmentRequest'
+      responses:
+        '200':
+          description: Партия создана
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreateShipmentResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /1.0/batch:
+    get:
+      tags:
+        - batches
+      summary: Получить все партии
+      description: Returns all batches (shipments) for the current user with pagination support.
+      operationId: getAllBatches
+      parameters:
+        - name: size
+          in: query
+          description: Количество записей на странице
+          schema:
+            type: integer
+        - name: page
+          in: query
+          description: Номер страницы
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Список партий
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetAllBatchesResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /1.0/batch/{name}:
+    get:
+      tags:
+        - batches
+      summary: Найти партию по наименованию
+      description: Returns details of a specific batch by its name.
+      operationId: getBatchByName
+      parameters:
+        - name: name
+          in: path
+          required: true
+          description: Наименование партии
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Партия
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BatchObject'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /1.0/batch/{name}/shipment:
+    post:
+      tags:
+        - batches
+      summary: Перенести заказы в партию
+      description: Transfers orders (by IDs) from the backlog or another batch into an existing named batch.
+      operationId: transferOrdersToBatch
+      parameters:
+        - name: name
+          in: path
+          required: true
+          description: Наименование партии
+          schema:
+            type: string
+        - name: group-name
+          in: query
+          description: Наименование группы (для перемещения из другой партии)
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BatchShipmentRequest'
+      responses:
+        '200':
+          description: Результат переноса
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BatchShipmentResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+    put:
+      tags:
+        - batches
+      summary: Добавить отправления в партию
+      description: Adds new shipments directly into an existing batch using order data objects.
+      operationId: addShipmentsToBatch
+      parameters:
+        - name: name
+          in: path
+          required: true
+          description: Наименование партии
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ShipmentAddRequest'
+      responses:
+        '200':
+          description: Результат добавления
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ShipmentAddResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /1.0/batch/{name}/shipment/delete:
+    delete:
+      tags:
+        - batches
+      summary: Удалить заказы из партии
+      description: Removes orders from a batch by their IDs, returning them to the backlog.
+      operationId: removeOrdersFromBatch
+      parameters:
+        - name: name
+          in: path
+          required: true
+          description: Наименование партии
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BatchShipmentRequest'
+      responses:
+        '200':
+          description: Результат удаления
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BatchShipmentResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /1.0/batch/{name}/shipment/{id}:
+    get:
+      tags:
+        - batches
+      summary: Найти отправление в партии по ID
+      description: Returns a single shipment within a batch by its order ID, including tracking information.
+      operationId: getShipmentInBatchById
+      parameters:
+        - name: name
+          in: path
+          required: true
+          description: Наименование партии
+          schema:
+            type: string
+        - name: id
+          in: path
+          required: true
+          description: Идентификатор заказа
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Отправление
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrderObject'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /1.0/batch/{name}/shipments:
+    get:
+      tags:
+        - batches
+      summary: Найти все отправления в партии
+      description: Returns all orders/shipments in a given batch with full tracking information.
+      operationId: getShipmentsInBatch
+      parameters:
+        - name: name
+          in: path
+          required: true
+          description: Наименование партии
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Список отправлений
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrderSearchResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /1.0/batch/{name}/shipments/group/{group-name}:
+    get:
+      tags:
+        - batches
+      summary: Найти отправления в партии по группе
+      description: Returns shipments in a batch filtered by group name.
+      operationId: getShipmentsInBatchByGroup
+      parameters:
+        - name: name
+          in: path
+          required: true
+          description: Наименование партии
+          schema:
+            type: string
+        - name: group-name
+          in: path
+          required: true
+          description: Наименование группы
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Список отправлений по группе
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrderSearchResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /1.0/batch/{name}/send:
+    post:
+      tags:
+        - batches
+      summary: Изменить дату сдачи партии
+      description: Updates the planned send date of a batch to the post office.
+      operationId: changeShipmentDate
+      parameters:
+        - name: name
+          in: path
+          required: true
+          description: Наименование партии
+          schema:
+            type: string
+        - name: send-date
+          in: query
+          required: true
+          description: Новая дата сдачи (ГГГГ-ММ-ДД)
+          schema:
+            type: string
+            format: date
+      responses:
+        '200':
+          description: Дата сдачи изменена
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChangeShipmentDateResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /1.0/batch/{name}/checkin:
+    post:
+      tags:
+        - batches
+      summary: Сдать партию в ОПС
+      description: Checks in a batch at the post office, triggering generation of form F103.
+      operationId: batchCheckin
+      parameters:
+        - name: name
+          in: path
+          required: true
+          description: Наименование партии
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Партия сдана
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BatchCheckinResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /1.0/forms/{id}/easy-print-a4:
+    get:
+      tags:
+        - documents
+      summary: Скачать форму А4 для отправления
+      description: Returns an A4 print form (PDF) for the specified order ID.
+      operationId: getEasyPrintA4
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Идентификатор заказа
+          schema:
+            type: integer
+        - name: print-type
+          in: query
+          description: Тип печати
+          schema:
+            type: string
+      responses:
+        '200':
+          $ref: '#/components/responses/BinaryPdf'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /1.0/forms/{id}/f7-print:
+    get:
+      tags:
+        - documents
+      summary: Скачать форму Ф7п
+      description: Returns the F7p postal form (PDF) for the specified order.
+      operationId: getF7Print
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Идентификатор заказа
+          schema:
+            type: integer
+        - name: print-type
+          in: query
+          description: Тип печати
+          schema:
+            type: string
+      responses:
+        '200':
+          $ref: '#/components/responses/BinaryPdf'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /1.0/forms/{id}/f112-print:
+    get:
+      tags:
+        - documents
+      summary: Скачать форму Ф112ЭК
+      description: Returns the F112EK postal form (PDF) for the specified order.
+      operationId: getF112Print
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Идентификатор заказа
+          schema:
+            type: integer
+        - name: print-type
+          in: query
+          description: Тип печати
+          schema:
+            type: string
+      responses:
+        '200':
+          $ref: '#/components/responses/BinaryPdf'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /1.0/forms/{id}/easy-return-print-a4:
+    get:
+      tags:
+        - documents
+      summary: Скачать этикетку возврата А4
+      description: Returns an A4 return label (PDF) for the specified order.
+      operationId: getEasyReturnPrintA4
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Идентификатор заказа
+          schema:
+            type: integer
+        - name: print-type
+          in: query
+          description: Тип печати
+          schema:
+            type: string
+      responses:
+        '200':
+          $ref: '#/components/responses/BinaryPdf'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /1.0/batch/{name}/easy-print-a4:
+    get:
+      tags:
+        - documents
+      summary: Скачать формы А4 для партии
+      description: Returns A4 print forms as a ZIP archive for all orders in the specified batch.
+      operationId: getBatchEasyPrintA4
+      parameters:
+        - name: name
+          in: path
+          required: true
+          description: Наименование партии
+          schema:
+            type: string
+        - name: print-type
+          in: query
+          description: Тип печати
+          schema:
+            type: string
+      responses:
+        '200':
+          $ref: '#/components/responses/BinaryZip'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /1.0/batch/{name}/f103-print:
+    get:
+      tags:
+        - documents
+      summary: Скачать форму Ф103 для партии
+      description: Returns the F103 acceptance list form (PDF) for the specified batch.
+      operationId: getBatchF103Print
+      parameters:
+        - name: name
+          in: path
+          required: true
+          description: Наименование партии
+          schema:
+            type: string
+      responses:
+        '200':
+          $ref: '#/components/responses/BinaryPdf'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /1.0/batch/{name}/zip-forms:
+    get:
+      tags:
+        - documents
+      summary: Скачать все формы партии (ZIP)
+      description: Returns a ZIP archive containing all postal forms for the specified batch.
+      operationId: getBatchZipForms
+      parameters:
+        - name: name
+          in: path
+          required: true
+          description: Наименование партии
+          schema:
+            type: string
+      responses:
+        '200':
+          $ref: '#/components/responses/BinaryZip'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /1.0/archive:
+    get:
+      tags:
+        - archive
+      summary: Получить партии в архиве
+      description: Returns the list of batches currently in the archive with pagination.
+      operationId: listArchive
+      parameters:
+        - name: size
+          in: query
+          description: Количество записей
+          schema:
+            type: integer
+        - name: page
+          in: query
+          description: Номер страницы
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Список партий в архиве
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ListArchiveResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+    put:
+      tags:
+        - archive
+      summary: Поместить партии в архив
+      description: Moves the specified batches (by name) into the archive.
+      operationId: putArchive
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PutArchiveRequest'
+      responses:
+        '200':
+          description: Результат архивирования
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PutArchiveResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /1.0/archive/revert:
+    post:
+      tags:
+        - archive
+      summary: Вернуть партии из архива
+      description: Moves the specified batches back from the archive to active state.
+      operationId: revertArchive
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ArchiveRevertRequest'
+      responses:
+        '200':
+          description: Наименования возвращённых партий
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ArchiveRevertResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /1.0/archive/{name}/f103-print:
+    get:
+      tags:
+        - archive
+      summary: Скачать Ф103 из архива
+      description: Returns the F103 form (PDF) for an archived batch.
+      operationId: getArchiveF103Print
+      parameters:
+        - name: name
+          in: path
+          required: true
+          description: Наименование партии в архиве
+          schema:
+            type: string
+      responses:
+        '200':
+          $ref: '#/components/responses/BinaryPdf'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /external/v1/long-term-storage:
+    get:
+      tags:
+        - archive
+      summary: Поиск в долгосрочном хранилище
+      description: Searches orders in long-term storage by barcode or date range.
+      operationId: searchLongTermArchive
+      parameters:
+        - name: barcode
+          in: query
+          description: ШПИ отправления
+          schema:
+            type: string
+        - name: date-from
+          in: query
+          description: Дата с
+          schema:
+            type: string
+            format: date
+        - name: date-to
+          in: query
+          description: Дата по
+          schema:
+            type: string
+            format: date
+        - name: size
+          in: query
+          description: Количество записей
+          schema:
+            type: integer
+        - name: page
+          in: query
+          description: Номер страницы
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Отправления из долгосрочного хранилища
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrderSearchResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /1.0/postoffice/{zip-code}:
+    get:
+      tags:
+        - post-offices
+      summary: Получить ОПС по индексу
+      description: Returns detailed information about a post office by its postal code (zip).
+      operationId: getPostOfficeByZip
+      parameters:
+        - name: zip-code
+          in: path
+          required: true
+          description: Почтовый индекс (6 цифр)
+          schema:
+            type: string
+            pattern: '^[0-9]{6}$'
+      responses:
+        '200':
+          description: Информация о почтовом отделении
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PostOfficeObject'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /1.0/postoffice/by-address:
+    get:
+      tags:
+        - post-offices
+      summary: Найти ОПС по адресу
+      description: Returns post offices matching the given address string, ordered by relevance.
+      operationId: getPostOfficeByAddress
+      parameters:
+        - name: address
+          in: query
+          required: true
+          description: Адрес для поиска
+          schema:
+            type: string
+        - name: top
+          in: query
+          description: Максимальное количество результатов
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Результаты поиска ОПС по адресу
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PostOfficeByAddressResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /1.0/postoffice/services:
+    get:
+      tags:
+        - post-offices
+      summary: Получить все сервисы ОПС
+      description: Returns a full list of services available across post offices.
+      operationId: getPostOfficeServices
+      responses:
+        '200':
+          description: Список сервисов
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PostOfficeServicesResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /1.0/postoffice/services/group/{group-id}:
+    get:
+      tags:
+        - post-offices
+      summary: Получить сервисы ОПС по группе
+      description: Returns services of post offices belonging to the specified service group.
+      operationId: getPostOfficeServicesByGroup
+      parameters:
+        - name: group-id
+          in: path
+          required: true
+          description: Идентификатор группы сервисов
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Список сервисов по группе
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PostOfficeServicesResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /1.0/postoffice/nearby:
+    get:
+      tags:
+        - post-offices
+      summary: Найти ближайшие ОПС
+      description: Returns the nearest post offices to the given geographic coordinates.
+      operationId: getNearbyPostOffices
+      parameters:
+        - name: latitude
+          in: query
+          required: true
+          description: Широта
+          schema:
+            type: number
+        - name: longitude
+          in: query
+          required: true
+          description: Долгота
+          schema:
+            type: number
+        - name: distance
+          in: query
+          description: Радиус поиска (метры)
+          schema:
+            type: integer
+        - name: top
+          in: query
+          description: Максимальное количество результатов
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Ближайшие ОПС
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PostOfficeNearbyResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /1.0/postoffice/settlement-codes:
+    get:
+      tags:
+        - post-offices
+      summary: Получить индексы населённых пунктов
+      description: Returns postal codes for settlements matching filter parameters. Without parameters returns a binary file download.
+      operationId: getSettlementCodes
+      parameters:
+        - name: settlement
+          in: query
+          description: Название населённого пункта
+          schema:
+            type: string
+        - name: region
+          in: query
+          description: Регион
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Список почтовых индексов или файл
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PostOfficeSettlementCodesResponse'
+            application/octet-stream:
+              schema:
+                type: string
+                format: binary
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /external/v1/delivery/timeslots/available:
+    get:
+      tags:
+        - time-slots
+      summary: Получить доступные временные слоты
+      description: Returns available timeslots for preliminary booking at a given postal index.
+      operationId: getTimeslotsByPostindex
+      parameters:
+        - name: postIndex
+          in: query
+          required: true
+          description: Почтовый индекс (6 цифр)
+          schema:
+            type: string
+            pattern: '^[0-9]{6}$'
+        - name: mailTypeCode
+          in: query
+          description: Код типа отправления
+          schema:
+            type: integer
+        - name: mailCtgCode
+          in: query
+          description: Код категории отправления
+          schema:
+            type: integer
+        - name: workTypeCode
+          in: query
+          description: Код типа работ
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Доступные временные слоты
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TimeslotsResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /external/v1/booking-by-postindex:
+    post:
+      tags:
+        - time-slots
+      summary: Забронировать временной слот
+      description: Books a delivery timeslot at the specified postal index with contact and shipment details.
+      operationId: bookTimeslotByPostindex
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TimeslotBookingRequest'
+      responses:
+        '200':
+          description: Слот успешно забронирован
+        '400':
+          description: Ошибка бронирования
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExternalErrorResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /external/v1/booking-by-postindex/{uuid}:
+    put:
+      tags:
+        - time-slots
+      summary: Уточнить бронирование (привязать ШПИ)
+      description: Associates an existing preliminary booking (by UUID) with an actual barcode (ШПИ) after order creation.
+      operationId: updateTimeslotBookingByPostindex
+      parameters:
+        - name: uuid
+          in: path
+          required: true
+          description: UUID предварительного бронирования
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TimeslotPutBookingRequest'
+      responses:
+        '200':
+          description: Бронирование обновлено
+        '400':
+          description: Ошибка обновления
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExternalErrorResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+    delete:
+      tags:
+        - time-slots
+      summary: Отменить бронирование временного слота
+      description: Cancels an existing timeslot booking by its UUID.
+      operationId: deleteTimeslotBooking
+      parameters:
+        - name: uuid
+          in: path
+          required: true
+          description: UUID предварительного бронирования
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Бронирование отменено
+        '400':
+          description: Ошибка отмены
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExternalErrorResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /external/v1/rebooking-timeslots:
+    get:
+      tags:
+        - time-slots
+      summary: Получить слоты для перебронирования
+      description: Returns timeslots available for rebooking, identified by UUID or barcode.
+      operationId: getTimeslotsForRebooking
+      parameters:
+        - name: uuidOrBarcode
+          in: query
+          required: true
+          description: UUID предварительного бронирования или ШПИ
+          schema:
+            type: string
+        - name: postIndex
+          in: query
+          required: true
+          description: Почтовый индекс
+          schema:
+            type: string
+            pattern: '^[0-9]{6}$'
+      responses:
+        '200':
+          description: Доступные слоты для перебронирования
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TimeslotsForRebookingResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /external/v1/booking-by-postindex/rebooking:
+    post:
+      tags:
+        - time-slots
+      summary: Перебронировать временной слот
+      description: Rebooks a delivery timeslot for an existing booking identified by UUID or barcode.
+      operationId: rebookTimeslot
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TimeslotRebookingRequest'
+      responses:
+        '200':
+          description: Перебронирование выполнено
+        '400':
+          description: Ошибка перебронирования
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExternalErrorResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /1.0/returns/return-barcode:
+    put:
+      tags:
+        - returns
+      summary: Создать возврат по прямому ШПИ
+      description: Creates a return shipment linked to an existing direct shipment identified by its barcode.
+      operationId: createReturnByDirectBarcode
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReturnCreateRequest'
+      responses:
+        '200':
+          description: Возврат создан
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReturnCreateResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /1.0/returns/without-direct:
+    put:
+      tags:
+        - returns
+      summary: Создать возврат без прямого отправления
+      description: Creates return shipments for orders not linked to a direct shipment barcode.
+      operationId: createReturnWithoutDirect
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReturnWithoutDirectRequest'
+      responses:
+        '200':
+          description: Результат создания возвратов
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReturnWithoutDirectResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /1.0/returns/{barcode}:
+    delete:
+      tags:
+        - returns
+      summary: Удалить возвратное отправление
+      description: Deletes a specific return shipment by its barcode (ШПИ).
+      operationId: deleteReturn
+      parameters:
+        - name: barcode
+          in: path
+          required: true
+          description: ШПИ возвратного отправления
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Возврат удалён
+        '400':
+          description: Ошибка удаления
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeleteSeparateReturnErrorResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    post:
+      tags:
+        - returns
+      summary: Редактировать возвратное отправление
+      description: Updates an existing return shipment identified by its barcode with new address or contact information.
+      operationId: editReturn
+      parameters:
+        - name: barcode
+          in: path
+          required: true
+          description: ШПИ возвратного отправления
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReturnsPostRequest'
+      responses:
+        '200':
+          description: Результат редактирования
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReturnsPostResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /1.0/clean/address:
+    post:
+      tags:
+        - utility
+      summary: Нормализовать адреса
+      description: Normalizes (cleans) an array of freeform addresses into structured components with quality and validation codes.
+      operationId: cleanAddresses
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CleanAddressRequest'
+      responses:
+        '200':
+          description: Нормализованные адреса
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CleanAddressResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /1.0/clean/physical:
+    post:
+      tags:
+        - utility
+      summary: Нормализовать ФИО
+      description: Normalizes full names (surname, first name, patronymic) from freeform strings into structured components.
+      operationId: cleanPhysical
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CleanPhysicalRequest'
+      responses:
+        '200':
+          description: Нормализованные ФИО
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CleanPhysicalResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /1.0/clean/phone:
+    post:
+      tags:
+        - utility
+      summary: Нормализовать телефоны
+      description: Normalizes phone numbers from freeform strings, splitting into country code, city code, and number.
+      operationId: cleanPhones
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CleanPhoneRequest'
+      responses:
+        '200':
+          description: Нормализованные телефоны
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CleanPhoneResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /1.0/tariff:
+    get:
+      tags:
+        - utility
+      summary: Рассчитать тариф
+      description: Calculates the delivery tariff for given shipment parameters including mass, dimensions, mail type, and service flags.
+      operationId: calculateTariff
+      parameters:
+        - name: completeness-checking
+          in: query
+          description: Проверка комплектности
+          schema:
+            type: boolean
+        - name: contents-checking
+          in: query
+          description: Проверка вложения
+          schema:
+            type: boolean
+        - name: courier
+          in: query
+          description: Курьер
+          schema:
+            type: boolean
+        - name: declared-value
+          in: query
+          description: Объявленная ценность
+          schema:
+            type: integer
+        - name: delivery-point-index
+          in: query
+          description: Индекс пункта выдачи
+          schema:
+            type: string
+        - name: dimension-type
+          in: query
+          description: Типоразмер
+          schema:
+            type: string
+            enum:
+              - S
+              - M
+              - L
+              - XL
+        - name: entries-type
+          in: query
+          required: true
+          description: Категория вложения
+          schema:
+            type: string
+            enum:
+              - GIFT
+              - DOCUMENT
+              - SALE_OF_GOODS
+              - COMMERCIAL_SAMPLE
+              - OTHER
+        - name: fragile
+          in: query
+          description: Осторожно/Хрупкое/Терморежим
+          schema:
+            type: boolean
+        - name: index-from
+          in: query
+          description: Индекс ОПС места приёма
+          schema:
+            type: string
+            pattern: '^[0-9]{6}$'
+        - name: index-to
+          in: query
+          description: Индекс ОПС назначения
+          schema:
+            type: string
+            pattern: '^[0-9]{6}$'
+        - name: inventory
+          in: query
+          required: true
+          description: Опись вложения
+          schema:
+            type: boolean
+        - name: mail-category
+          in: query
+          required: true
+          description: Категория РПО
+          schema:
+            type: string
+            enum:
+              - SIMPLE
+              - ORDERED
+              - ORDINARY
+              - WITH_DECLARED_VALUE
+              - WITH_DECLARED_VALUE_AND_CASH_ON_DELIVERY
+        - name: mail-direct
+          in: query
+          description: Код страны назначения
+          schema:
+            type: integer
+        - name: mail-type
+          in: query
+          required: true
+          description: Вид РПО
+          schema:
+            type: string
+            enum:
+              - UNDEFINED
+              - POSTAL_PARCEL
+              - ONLINE_PARCEL
+              - ONLINE_COURIER
+              - LETTER
+              - BANDEROL
+              - BUSINESS_COURIER
+              - BUSINESS_COURIER_ES
+              - EMS
+              - EMS_OPTIMAL
+              - SMALL_PACKET
+        - name: mass
+          in: query
+          required: true
+          description: Масса отправления (граммы)
+          schema:
+            type: integer
+            minimum: 0
+        - name: notice-payment-method
+          in: query
+          description: Способ оплаты уведомления
+          schema:
+            type: string
+            enum:
+              - CASHLESS
+              - STAMP
+              - FRANKING
+        - name: payment-method
+          in: query
+          description: Способ оплаты
+          schema:
+            type: string
+            enum:
+              - CASHLESS
+              - STAMP
+              - FRANKING
+        - name: sms-notice-recipient
+          in: query
+          description: SMS-уведомление получателю
+          schema:
+            type: integer
+        - name: transport-type
+          in: query
+          description: Вид транспортировки
+          schema:
+            type: string
+            enum:
+              - SURFACE
+              - AVIA
+              - COMBINED
+              - EXPRESS
+        - name: vsd
+          in: query
+          description: Возврат сопроводительных документов
+          schema:
+            type: boolean
+        - name: with-electronic-notice
+          in: query
+          description: С электронным уведомлением
+          schema:
+            type: boolean
+        - name: with-order-of-notice
+          in: query
+          required: true
+          description: С заказным уведомлением
+          schema:
+            type: boolean
+        - name: with-simple-notice
+          in: query
+          required: true
+          description: С простым уведомлением
+          schema:
+            type: boolean
+      responses:
+        '200':
+          description: Расчёт тарифа
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TariffResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /1.0/settings/limit:
+    get:
+      tags:
+        - utility
+      summary: Получить лимиты запросов
+      description: Returns the API request limits (allowed and current count) for the current client account.
+      operationId: getSettingsLimit
+      responses:
+        '200':
+          description: Лимиты запросов
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SettingsLimitResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /1.0/settings:
+    get:
+      tags:
+        - utility
+      summary: Получить настройки пользователя
+      description: Returns the full user account settings including addresses, products, shipping points, and configuration flags.
+      operationId: getUserSettings
+      responses:
+        '200':
+          description: Настройки пользователя
+          content:
+            application/json:
+              schema:
+                type: object
+                description: Настройки аккаунта пользователя Почты России
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /1.0/shipping-points:
+    get:
+      tags:
+        - utility
+      summary: Получить точки сдачи пользователя
+      description: Returns the list of postal drop-off points (shipping points) associated with the user account.
+      operationId: getUserShippingPoints
+      responses:
+        '200':
+          description: Список точек сдачи
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserShippingPointsResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'

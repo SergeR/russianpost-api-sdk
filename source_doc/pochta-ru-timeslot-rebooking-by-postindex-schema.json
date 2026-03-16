@@ -1,0 +1,79 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "pochta-ru-timeslot-rebooking-by-postindex-schema.json",
+  "title": "Почта России - Схема перебронирования временного интервала",
+  "description": "JSON Schema для API перебронирования временного интервала Почты России",
+  "definitions": {
+    "request": {
+      "type": "object",
+      "title": "Запрос на перебронирование временного интервала",
+      "description": "Структура запроса для перебронирования временного интервала",
+      "properties": {
+        "uuidOrBarcode": {
+          "type": "string",
+          "description": "UUID предварительного бронирования или ШПИ",
+          "maxLength": 50
+        },
+        "timeslotId": {
+          "type": "integer",
+          "description": "Идентификатор временного интервала"
+        },
+        "contractNumber": {
+          "type": "string",
+          "description": "Номер договора",
+          "maxLength": 50
+        },
+        "plannedShippingDate": {
+          "type": "string",
+          "description": "Плановая дата в формате: yyyy-MM-dd",
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+        }
+      },
+      "required": [
+        "uuidOrBarcode",
+        "timeslotId",
+        "contractNumber",
+        "plannedShippingDate"
+      ],
+      "additionalProperties": false
+    },
+    "response": {
+      "type": "object",
+      "title": "Ответ API",
+      "description": "Структура ответа API при возникновении ошибки",
+      "properties": {
+        "code": {
+          "type": "string",
+          "description": "Текстовый идентификатор ошибки"
+        },
+        "message": {
+          "type": "string",
+          "description": "Подробное описание ошибки поля входных данных"
+        },
+        "errors": {
+          "type": "array",
+          "description": "Возвращается при наличии ошибок в полях входных данных",
+          "items": {
+            "type": "object",
+            "properties": {
+              "field": {
+                "type": "string",
+                "description": "Текстовый идентификатор поля входных данных"
+              },
+              "message": {
+                "type": "string",
+                "description": "Подробное описание ошибки поля входных данных"
+              }
+            },
+            "required": [
+              "field",
+              "message"
+            ],
+            "additionalProperties": false
+          }
+        }
+      },
+      "additionalProperties": false
+    }
+  }
+}

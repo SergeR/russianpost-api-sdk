@@ -1,0 +1,53 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "pochta-ru-order-back-new-schema.json",
+  "title": "Почта России - Схема запроса возврата заказов",
+  "description": "JSON Schema для API возврата заказов Почты России",
+  "definitions": {
+    "request": {
+      "type": "array",
+      "description": "Список внутренних идентификаторов заказов",
+      "items": {
+        "type": "string"
+      },
+      "minItems": 1
+    },
+    "response": {
+      "type": "object",
+      "description": "Ответ API с результатами обработки заказов",
+      "properties": {
+        "errors": {
+          "type": "array",
+          "description": "Список ошибок",
+          "items": {
+            "type": "object",
+            "properties": {
+              "error-code": {
+                "type": "string",
+                "description": "Код ошибки",
+                "enum": ["UNDEFINED"]
+              },
+              "error-details": {
+                "type": "string",
+                "description": "Описание ошибки"
+              },
+              "position": {
+                "type": "integer",
+                "description": "Индекс в исходном массиве",
+                "minimum": 0
+              }
+            }
+          }
+        },
+        "result-ids": {
+          "type": "array",
+          "description": "Список успешно обработанных внутренних идентификаторов отправлений",
+          "items": {
+            "type": "integer",
+            "minimum": 0
+          }
+        }
+      }
+    }
+  }
+}

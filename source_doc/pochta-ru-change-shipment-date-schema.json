@@ -1,0 +1,24 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Pochta Russia Change Shipment Date API Schema",
+  "description": "JSON Schema для API Почты России - изменение даты отправки",
+  "definitions": {
+    "response": {
+      "type": "object",
+      "description": "Структура ответа API",
+      "properties": {
+        "error-code": {
+          "type": "string",
+          "description": "Код ошибки. См. ошибки",
+          "enum": ["UNDEFINED"]
+        },
+        "f103-sent": {
+          "type": "boolean",
+          "description": "Отослана ли электронная версия ф103/ф103п в ОПС?"
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "$ref": "#/definitions/response"
+}

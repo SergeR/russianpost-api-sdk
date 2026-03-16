@@ -1,0 +1,55 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://api.pochta.ru/schemas/batch-shipment.json",
+  "title": "Схема API Почты России для добавления отправлений в партию",
+  "description": "JSON Schema для запроса и ответа API добавления отправлений в партию отгрузки",
+  "definitions": {
+    "request": {
+      "type": "array",
+      "description": "Список внутренних идентификаторов заказов",
+      "items": {
+        "type": "integer",
+        "description": "Внутренний идентификатор заказа"
+      },
+      "minItems": 1
+    },
+    "response": {
+      "type": "object",
+      "description": "Ответ API о результатах добавления отправлений в партию",
+      "properties": {
+        "errors": {
+          "type": "array",
+          "description": "Список ошибок",
+          "items": {
+            "type": "object",
+            "description": "Информация об ошибке",
+            "properties": {
+              "error-code": {
+                "type": "string",
+                "description": "Код ошибки. См. ошибки",
+                "example": "UNDEFINED"
+              },
+              "error-details": {
+                "type": "string",
+                "description": "Описание ошибки"
+              },
+              "position": {
+                "type": "integer",
+                "description": "Индекс в исходном массиве",
+                "minimum": 0
+              }
+            }
+          }
+        },
+        "result-ids": {
+          "type": "array",
+          "description": "Список успешно перенесенных в партию внутренних идентификаторов отправлений",
+          "items": {
+            "type": "integer",
+            "description": "Внутренний идентификатор успешно добавленного отправления"
+          }
+        }
+      }
+    }
+  }
+}

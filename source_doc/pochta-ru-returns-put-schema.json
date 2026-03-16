@@ -1,0 +1,89 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://pochta.ru/api/returns/put-schema.json",
+  "title": "Почта России - API создания возвратного отправления",
+  "description": "JSON Schema для запроса и ответа API создания возвратного отправления Почты России",
+  "definitions": {
+    "request": {
+      "type": "object",
+      "title": "Запрос на создание возвратного отправления",
+      "description": "Структура запроса для создания возвратного отправления",
+      "properties": {
+        "direct-barcode": {
+          "type": "string",
+          "description": "ШПИ прямого отправления"
+        },
+        "mail-type": {
+          "type": "string",
+          "description": "Вид РПО",
+          "enum": [
+            "UNDEFINED",
+            "POSTAL_PARCEL",
+            "ONLINE_PARCEL",
+            "ONLINE_COURIER",
+            "EMS",
+            "EMS_OPTIMAL",
+            "LETTER",
+            "LETTER_CLASS_1",
+            "BANDEROL",
+            "BUSINESS_COURIER",
+            "BUSINESS_COURIER_ES",
+            "PARCEL_CLASS_1",
+            "BANDEROL_CLASS_1",
+            "VSD",
+            "ECOM"
+          ],
+          "default": "UNDEFINED"
+        }
+      },
+      "required": [
+        "direct-barcode",
+        "mail-type"
+      ],
+      "additionalProperties": false
+    },
+    "response": {
+      "type": "object",
+      "title": "Ответ на создание возвратного отправления",
+      "description": "Структура ответа при создании возвратного отправления",
+      "properties": {
+        "errors": {
+          "type": "array",
+          "description": "Ошибка создания возвратного отправления",
+          "items": {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "string",
+                "description": "Код ошибки",
+                "enum": [
+                  "DIRECT_SHIPMENT_NOT_FOUND",
+                  "INVALID_MAIL_TYPE",
+                  "ALREADY_EXISTS",
+                  "INVALID_BARCODE",
+                  "SHIPMENT_NOT_DELIVERED",
+                  "RETURN_NOT_ALLOWED",
+                  "INTERNAL_ERROR"
+                ]
+              },
+              "description": {
+                "type": "string",
+                "description": "Описание ошибки"
+              }
+            },
+            "required": [
+              "code",
+              "description"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "return-barcode": {
+          "type": "string",
+          "description": "ШПИ возвратного отправления"
+        }
+      },
+      "additionalProperties": false
+    }
+  }
+}

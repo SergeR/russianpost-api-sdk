@@ -1,0 +1,49 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Почта России - API партий (архив)",
+  "description": "Схема запроса и ответа для API работы с партиями Почты России",
+  "definitions": {
+    "request": {
+      "type": "array",
+      "description": "Список с именами партий",
+      "items": {
+        "type": "string"
+      }
+    },
+    "response": {
+      "type": "array",
+      "description": "Список результатов обработки партий",
+      "items": {
+        "type": "object",
+        "properties": {
+          "batch-name": {
+            "type": "string",
+            "description": "Наименование партии"
+          },
+          "error-code": {
+            "type": "string",
+            "description": "Ошибка",
+            "enum": [
+              "UNDEFINED",
+              "BARCODE_ERROR",
+              "ILLEGAL_MAIL_TYPE",
+              "ILLEGAL_MAIL_CATEGORY",
+              "RESTRICTED_MAIL_CATEGORY",
+              "SENDING_MAIL_FAILED",
+              "NOT_FOUND",
+              "PAST_DUE_DATE",
+              "ILLEGAL_POSTCODE",
+              "READONLY_STATE",
+              "ALL_SHIPMENTS_SENT",
+              "DIFFERENT_TRANSPORT_TYPE",
+              "DIFFERENT_POSTMARK",
+              "NO_AVAILABLE_POSTOFFICES",
+              "ILLEGAL_POSTOFFICE_CODE",
+              "EMPTY_POSTOFFICE_CODE"
+            ]
+          }
+        }
+      }
+    }
+  }
+}

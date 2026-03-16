@@ -1,0 +1,35 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "pochta-ru-user-shipping-points-schema.json",
+  "title": "Почта России - Точки сдачи",
+  "description": "Схема ответа API для получения точек сдачи отправлений Почты России",
+  "definitions": {
+    "response": {
+      "type": "array",
+      "description": "Массив точек сдачи отправлений",
+      "items": {
+        "type": "object",
+        "description": "Информация о точке сдачи",
+        "required": [
+          "operator-postcode"
+        ],
+        "properties": {
+          "enabled": {
+            "type": "boolean",
+            "description": "Признак активации"
+          },
+          "operator-postcode": {
+            "type": "string",
+            "description": "Индекс почтового отделения обслуживания"
+          },
+          "ops-address": {
+            "type": "string",
+            "description": "Адрес ОПС"
+          }
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "$ref": "#/definitions/response"
+}

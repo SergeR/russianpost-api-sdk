@@ -1,0 +1,25 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "pochta-ru-archive-revert-schema.json",
+  "title": "Pochta.ru Archive Revert API Schema",
+  "description": "JSON Schema для API Почты России - операция возврата партий из архива",
+  "definitions": {
+    "request": {
+      "type": "array",
+      "description": "Список с именами партий",
+      "items": {
+        "type": "string",
+        "description": "Имя партии для возврата из архива"
+      },
+      "minItems": 1
+    },
+    "response": {
+      "type": "array",
+      "description": "Список с именами партий",
+      "items": {
+        "type": "string",
+        "description": "Имя партии, возвращенной из архива"
+      }
+    }
+  }
+}

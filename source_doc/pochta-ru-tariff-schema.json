@@ -1,0 +1,262 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://api.pochta.ru/schemas/tariff.json",
+  "title": "Pochta.ru Tariff API Schema",
+  "description": "JSON Schema для API расчета тарифов Почты России",
+  "definitions": {
+    "request": {
+      "type": "object",
+      "title": "Запрос на расчет тарифа",
+      "description": "Структура запроса для расчета стоимости отправления",
+      "properties": {
+        "completeness-checking": {
+          "type": "boolean",
+          "description": "Признак услуги проверки комплектности"
+        },
+        "contents-checking": {
+          "type": "boolean",
+          "description": "Признак услуги проверки вложения"
+        },
+        "courier": {
+          "type": "boolean",
+          "description": "Отметка \"Курьер\""
+        },
+        "declared-value": {
+          "type": "integer",
+          "description": "Объявленная ценность",
+          "minimum": 0
+        },
+        "delivery-point-index": {
+          "type": "string",
+          "description": "Идентификатор пункта выдачи заказов"
+        },
+        "dimension": {
+          "type": "object",
+          "description": "Линейные размеры",
+          "properties": {
+            "height": {
+              "type": "integer",
+              "description": "Линейная высота (сантиметры)",
+              "minimum": 0
+            },
+            "length": {
+              "type": "integer",
+              "description": "Линейная длина (сантиметры)",
+              "minimum": 0
+            },
+            "width": {
+              "type": "integer",
+              "description": "Линейная ширина (сантиметры)",
+              "minimum": 0
+            }
+          }
+        },
+        "dimension-type": {
+          "type": "string",
+          "description": "Типоразмер",
+          "enum": ["S", "M", "L", "XL"]
+        },
+        "entries-type": {
+          "type": "string",
+          "description": "Категория вложения (для международных отправлений)",
+          "enum": ["GIFT", "DOCUMENT", "SALE_OF_GOODS", "COMMERCIAL_SAMPLE", "OTHER"]
+        },
+        "fragile": {
+          "type": "boolean",
+          "description": "Отметка \"Осторожно/Хрупкое/Терморежим\""
+        },
+        "index-from": {
+          "type": "string",
+          "description": "Почтовый индекс объекта почтовой связи места приема",
+          "pattern": "^[0-9]{6}$"
+        },
+        "index-to": {
+          "type": "string",
+          "description": "Почтовый индекс объекта почтовой связи места назначения",
+          "pattern": "^[0-9]{6}$"
+        },
+        "inventory": {
+          "type": "boolean",
+          "description": "Опись вложения"
+        },
+        "mail-category": {
+          "type": "string",
+          "description": "Категория РПО",
+          "enum": ["SIMPLE", "ORDERED", "ORDINARY", "WITH_DECLARED_VALUE", "WITH_DECLARED_VALUE_AND_CASH_ON_DELIVERY"]
+        },
+        "mail-direct": {
+          "type": "integer",
+          "description": "Код страны назначения",
+          "minimum": 0
+        },
+        "mail-type": {
+          "type": "string",
+          "description": "Вид РПО",
+          "enum": ["UNDEFINED", "POSTAL_PARCEL", "ONLINE_PARCEL", "ONLINE_COURIER", "LETTER", "BANDEROL", "BUSINESS_COURIER", "BUSINESS_COURIER_ES", "EMS", "EMS_OPTIMAL", "SMALL_PACKET"]
+        },
+        "mass": {
+          "type": "integer",
+          "description": "Масса отправления в граммах",
+          "minimum": 0
+        },
+        "notice-payment-method": {
+          "type": "string",
+          "description": "Способ оплаты уведомления",
+          "enum": ["CASHLESS", "STAMP", "FRANKING"]
+        },
+        "payment-method": {
+          "type": "string",
+          "description": "Способ оплаты",
+          "enum": ["CASHLESS", "STAMP", "FRANKING"]
+        },
+        "sms-notice-recipient": {
+          "type": "integer",
+          "description": "Признак услуги SMS уведомления",
+          "minimum": 0
+        },
+        "transport-type": {
+          "type": "string",
+          "description": "Вид транспортировки",
+          "enum": ["SURFACE", "AVIA", "COMBINED", "EXPRESS"]
+        },
+        "vsd": {
+          "type": "boolean",
+          "description": "Возврат сопроводительных документов"
+        },
+        "with-electronic-notice": {
+          "type": "boolean",
+          "description": "Отметка 'С электронным уведомлением'"
+        },
+        "with-order-of-notice": {
+          "type": "boolean",
+          "description": "Отметка 'С заказным уведомлением'"
+        },
+        "with-simple-notice": {
+          "type": "boolean",
+          "description": "Отметка 'С простым уведомлением'"
+        }
+      },
+      "required": [
+        "entries-type",
+        "inventory",
+        "mail-category",
+        "mail-type",
+        "mass",
+        "with-order-of-notice",
+        "with-simple-notice"
+      ]
+    },
+    "response": {
+      "type": "object",
+      "title": "Ответ с расчетом тарифа",
+      "description": "Структура ответа с детализацией стоимости отправления",
+      "properties": {
+        "avia-rate": {
+          "$ref": "#/definitions/rate",
+          "description": "Плата за Авиа-пересылку (коп)"
+        },
+        "completeness-checking-rate": {
+          "$ref": "#/definitions/rate",
+          "description": "Плата за \"Проверку комплектности\" (коп)"
+        },
+        "contents-checking-rate": {
+          "$ref": "#/definitions/rate",
+          "description": "Плата за \"Проверку вложений\" (коп)"
+        },
+        "delivery-time": {
+          "type": "object",
+          "description": "Время доставки",
+          "properties": {
+            "max-days": {
+              "type": "integer",
+              "description": "Максимальное время доставки (дни)",
+              "minimum": 0
+            },
+            "min-days": {
+              "type": "integer",
+              "description": "Минимальное время доставки (дни)",
+              "minimum": 0
+            }
+          },
+          "required": ["max-days"]
+        },
+        "fragile-rate": {
+          "$ref": "#/definitions/rate",
+          "description": "Надбавка за отметку \"Осторожно/Хрупкое/Терморежим\""
+        },
+        "ground-rate": {
+          "$ref": "#/definitions/rate",
+          "description": "Плата за пересылку (коп)"
+        },
+        "insurance-rate": {
+          "$ref": "#/definitions/rate",
+          "description": "Плата за объявленную ценность (коп)"
+        },
+        "inventory-rate": {
+          "$ref": "#/definitions/rate",
+          "description": "Плата за \"Опись вложения\" (коп)"
+        },
+        "notice-payment-method": {
+          "type": "string",
+          "description": "Способ оплаты уведомления",
+          "enum": ["CASHLESS", "STAMP", "FRANKING"]
+        },
+        "notice-rate": {
+          "$ref": "#/definitions/rate",
+          "description": "Надбавка за уведомление о вручении"
+        },
+        "oversize-rate": {
+          "$ref": "#/definitions/rate",
+          "description": "Надбавка за негабарит при весе более 10кг"
+        },
+        "payment-method": {
+          "type": "string",
+          "description": "Способ оплаты",
+          "enum": ["CASHLESS", "STAMP", "FRANKING"]
+        },
+        "sms-notice-recipient-rate": {
+          "$ref": "#/definitions/rate",
+          "description": "Плата за \"Пакет смс получателю\" (коп)"
+        },
+        "total-rate": {
+          "type": "integer",
+          "description": "Плата всего (коп)",
+          "minimum": 0
+        },
+        "total-vat": {
+          "type": "integer",
+          "description": "Всего НДС (коп)",
+          "minimum": 0
+        },
+        "vsd-rate": {
+          "$ref": "#/definitions/rate",
+          "description": "Плата за \"Возврат сопроводительных документов\" (коп)"
+        }
+      },
+      "required": [
+        "inventory-rate",
+        "total-rate",
+        "total-vat",
+        "vsd-rate"
+      ]
+    },
+    "rate": {
+      "type": "object",
+      "title": "Тариф",
+      "description": "Структура тарифа с НДС",
+      "properties": {
+        "rate": {
+          "type": "integer",
+          "description": "Тариф без НДС (коп)",
+          "minimum": 0
+        },
+        "vat": {
+          "type": "integer",
+          "description": "НДС (коп)",
+          "minimum": 0
+        }
+      },
+      "required": ["rate"]
+    }
+  }
+}

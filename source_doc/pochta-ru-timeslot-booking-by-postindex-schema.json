@@ -1,0 +1,136 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Pochta Russia Timeslot Booking by Postindex API Schema",
+  "description": "JSON Schema для API бронирования временных интервалов доставки Почты России",
+  "definitions": {
+    "request": {
+      "type": "object",
+      "title": "Запрос на бронирование временного интервала",
+      "description": "Структура запроса для бронирования временного интервала доставки",
+      "required": [
+        "uuid",
+        "timeslotId",
+        "phone",
+        "postIndexFrom",
+        "postIndexTo",
+        "contractNumber",
+        "plannedShippingDate",
+        "address",
+        "workTypeCode",
+        "mailTypeCode",
+        "mailCtgCode"
+      ],
+      "properties": {
+        "uuid": {
+          "type": "string",
+          "description": "UUID",
+          "format": "uuid",
+          "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
+          "example": "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+        },
+        "timeslotId": {
+          "type": "integer",
+          "description": "Идентификатор временного интервала",
+          "example": 0
+        },
+        "contactName": {
+          "type": "string",
+          "description": "Имя получателя (максимальная длина 200 символов)",
+          "maxLength": 200
+        },
+        "phone": {
+          "type": "string",
+          "description": "Телефон получателя (максимальная длина 50 символов)",
+          "maxLength": 50
+        },
+        "postIndexFrom": {
+          "type": "string",
+          "description": "Почтовый индекс отправителя (6 цифр)",
+          "pattern": "^[0-9]{6}$",
+          "minLength": 6,
+          "maxLength": 6
+        },
+        "postIndexTo": {
+          "type": "string",
+          "description": "Почтовый индекс получателя (6 цифр)",
+          "pattern": "^[0-9]{6}$",
+          "minLength": 6,
+          "maxLength": 6
+        },
+        "contractNumber": {
+          "type": "string",
+          "description": "Номер договора (максимальная длина 50 символов)",
+          "maxLength": 50
+        },
+        "plannedShippingDate": {
+          "type": "string",
+          "description": "Плановая дата в формате: yyyy-MM-dd",
+          "format": "date",
+          "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$",
+          "example": "2023-02-03"
+        },
+        "address": {
+          "type": "string",
+          "description": "Адрес получателя (максимальная длина 255 символов)",
+          "maxLength": 255
+        },
+        "workTypeCode": {
+          "type": "string",
+          "description": "Код типа работ. В текущей реализации может принимать только значение \"delivery\" (Доставка)",
+          "enum": ["delivery"]
+        },
+        "mailTypeCode": {
+          "type": "integer",
+          "description": "Код типа отправления"
+        },
+        "mailCtgCode": {
+          "type": "integer",
+          "description": "Код категории почтового отправления"
+        }
+      },
+      "additionalProperties": false
+    },
+    "response": {
+      "type": "object",
+      "title": "Ответ с ошибкой",
+      "description": "Структура ответа при наличии ошибок",
+      "required": [
+        "code",
+        "message"
+      ],
+      "properties": {
+        "code": {
+          "type": "string",
+          "description": "Текстовый идентификатор ошибки"
+        },
+        "message": {
+          "type": "string",
+          "description": "Подробное описание ошибки поля входных данных"
+        },
+        "errors": {
+          "type": "array",
+          "description": "Возвращается при наличии ошибок в полях входных данных",
+          "items": {
+            "type": "object",
+            "required": [
+              "field",
+              "message"
+            ],
+            "properties": {
+              "field": {
+                "type": "string",
+                "description": "Текстовый идентификатор поля входных данных"
+              },
+              "message": {
+                "type": "string",
+                "description": "Подробное описание ошибки поля входных данных"
+              }
+            },
+            "additionalProperties": false
+          }
+        }
+      },
+      "additionalProperties": false
+    }
+  }
+}

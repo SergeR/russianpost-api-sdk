@@ -1,0 +1,96 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://otpravka.pochta.ru/api/schemas/clean-phone",
+  "title": "Почта России - Нормализация телефонных номеров",
+  "description": "JSON Schema для API нормализации телефонных номеров Почты России",
+  "definitions": {
+    "request": {
+      "type": "array",
+      "description": "Массив телефонных номеров для нормализации",
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "original-phone"
+        ],
+        "properties": {
+          "area": {
+            "type": "string",
+            "description": "Область/край телефонного номера"
+          },
+          "id": {
+            "type": "string",
+            "description": "Идентификатор записи"
+          },
+          "original-phone": {
+            "type": "string",
+            "description": "Оригинальный номер одной строкой"
+          },
+          "place": {
+            "type": "string",
+            "description": "Город телефонного номера"
+          },
+          "region": {
+            "type": "string",
+            "description": "Регион телефонного номера"
+          }
+        },
+        "additionalProperties": false
+      },
+      "minItems": 1
+    },
+    "response": {
+      "type": "array",
+      "description": "Массив нормализованных телефонных номеров",
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "original-phone",
+          "phone-city-code",
+          "phone-country-code",
+          "phone-extension",
+          "phone-number",
+          "quality-code"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Идентификатор записи"
+          },
+          "original-phone": {
+            "type": "string",
+            "description": "Оригинальный номер одной строкой"
+          },
+          "phone-city-code": {
+            "type": "string",
+            "description": "Код города"
+          },
+          "phone-country-code": {
+            "type": "string",
+            "description": "Код страны"
+          },
+          "phone-extension": {
+            "type": "string",
+            "description": "Добавочный номер"
+          },
+          "phone-number": {
+            "type": "string",
+            "description": "Телефонный номер"
+          },
+          "quality-code": {
+            "type": "string",
+            "description": "Код качества нормализации телефона",
+            "enum": [
+              "CONFIRMED_MANUALLY",
+              "CONFIRMED",
+              "NOT_CONFIRMED",
+              "UNKNOWN"
+            ]
+          }
+        },
+        "additionalProperties": false
+      }
+    }
+  }
+}

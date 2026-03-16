@@ -1,0 +1,172 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://api.pochta.ru/schemas/returns-post-schema.json",
+  "title": "Почта России - Схема создания возвратного отправления",
+  "description": "JSON Schema для запроса и ответа API создания возвратного отправления Почты России",
+  "definitions": {
+    "address": {
+      "type": "object",
+      "description": "Адрес",
+      "required": [
+        "address-type",
+        "index",
+        "place",
+        "region"
+      ],
+      "properties": {
+        "address-type": {
+          "type": "string",
+          "description": "Тип адреса",
+          "default": "DEFAULT"
+        },
+        "area": {
+          "type": "string",
+          "description": "Район"
+        },
+        "building": {
+          "type": "string",
+          "description": "Часть здания: Строение"
+        },
+        "corpus": {
+          "type": "string",
+          "description": "Часть здания: Корпус"
+        },
+        "hotel": {
+          "type": "string",
+          "description": "Название гостиницы"
+        },
+        "house": {
+          "type": "string",
+          "description": "Часть адреса: Номер здания"
+        },
+        "index": {
+          "type": "string",
+          "description": "Почтовый индекс",
+          "pattern": "^[0-9]{6}$"
+        },
+        "letter": {
+          "type": "string",
+          "description": "Часть здания: Литера"
+        },
+        "location": {
+          "type": "string",
+          "description": "Микрорайон"
+        },
+        "manual-address-input": {
+          "type": "boolean",
+          "description": "Признак ручного ввода адреса"
+        },
+        "num-address-type": {
+          "type": "string",
+          "description": "Номер для а/я, войсковая часть, войсковая часть ЮЯ, полевая почта"
+        },
+        "office": {
+          "type": "string",
+          "description": "Часть здания: Офис"
+        },
+        "place": {
+          "type": "string",
+          "description": "Населенный пункт"
+        },
+        "region": {
+          "type": "string",
+          "description": "Область, регион"
+        },
+        "room": {
+          "type": "string",
+          "description": "Часть здания: Номер помещения"
+        },
+        "slash": {
+          "type": "string",
+          "description": "Часть здания: Дробь"
+        },
+        "street": {
+          "type": "string",
+          "description": "Часть адреса: Улица"
+        },
+        "vladenie": {
+          "type": "string",
+          "description": "Часть адреса: Владение"
+        }
+      }
+    },
+    "request": {
+      "type": "object",
+      "description": "Запрос на создание возвратного отправления",
+      "properties": {
+        "address-from": {
+          "$ref": "#/definitions/address",
+          "description": "Адрес отправителя"
+        },
+        "address-to": {
+          "$ref": "#/definitions/address",
+          "description": "Адрес получателя"
+        },
+        "insr-value": {
+          "type": "integer",
+          "description": "Сумма объявленной ценности (копейки)",
+          "minimum": 0
+        },
+        "order-num": {
+          "type": "string",
+          "description": "Номер заказа. Внешний идентификатор заказа, который формируется отправителем"
+        },
+        "postoffice-code": {
+          "type": "string",
+          "description": "Индекс ОПС",
+          "pattern": "^[0-9]{6}$"
+        },
+        "recipient-name": {
+          "type": "string",
+          "description": "Наименование получателя одной строкой (ФИО, наименование организации)"
+        },
+        "sender-name": {
+          "type": "string",
+          "description": "Наименование отправителя одной строкой (ФИО, наименование организации)"
+        }
+      }
+    },
+    "error": {
+      "type": "object",
+      "description": "Ошибка при редактировании возвратного отправления",
+      "required": [
+        "code",
+        "description"
+      ],
+      "properties": {
+        "code": {
+          "type": "string",
+          "description": "Код ошибки",
+          "enum": [
+            "DIRECT_SHIPMENT_NOT_FOUND"
+          ]
+        },
+        "description": {
+          "type": "string",
+          "description": "Описание ошибки"
+        }
+      }
+    },
+    "response": {
+      "type": "object",
+      "description": "Ответ API при создании возвратного отправления",
+      "properties": {
+        "errors": {
+          "type": "array",
+          "description": "Массив ошибок при редактировании возвратного отправления",
+          "items": {
+            "$ref": "#/definitions/error"
+          }
+        }
+      }
+    }
+  },
+  "oneOf": [
+    {
+      "$ref": "#/definitions/request"
+    },
+    {
+      "$ref": "#/definitions/response"
+    }
+  ]
+}

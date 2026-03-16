@@ -1,0 +1,435 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Почта России - Получение всех партий",
+  "description": "JSON Schema для API метода получения списка партий",
+  "definitions": {
+    "response": {
+      "type": "array",
+      "description": "Массив партий",
+      "items": {
+        "type": "object",
+        "required": [
+          "batch-name",
+          "batch-status",
+          "batch-status-date",
+          "is-postoffice-ukd",
+          "mail-category",
+          "mail-category-text",
+          "mail-type",
+          "mail-type-text",
+          "payment-method",
+          "postmarks",
+          "postoffice-address",
+          "postoffice-code",
+          "postoffice-name",
+          "shipment-completeness-checking-rate-sum",
+          "shipment-completeness-checking-rate-vat-sum",
+          "shipment-contents-checking-rate-sum",
+          "shipment-contents-checking-rate-vat-sum",
+          "shipment-functionality-checking-rate-sum",
+          "shipment-functionality-checking-rate-vat-sum",
+          "shipment-inventory-rate-sum",
+          "shipment-inventory-rate-vat-sum",
+          "shipment-partial-redemption-rate-sum",
+          "shipment-partial-redemption-rate-vat-sum",
+          "shipment-pre-postal-preparation-rate-sum",
+          "shipment-pre-postal-preparation-rate-vat-sum",
+          "shipment-sms-notice-rate-sum",
+          "shipment-sms-notice-rate-vat-sum",
+          "shipment-with-fitting-rate-sum",
+          "shipment-with-fitting-rate-vat-sum",
+          "shipping-notice-type",
+          "transport-type",
+          "ukd"
+        ],
+        "properties": {
+          "accepted-count": {
+            "type": "integer",
+            "description": "Количество отправленни, прибывших в отделение связи (для БК)"
+          },
+          "batch-name": {
+            "type": "string",
+            "description": "Номер партии"
+          },
+          "batch-status": {
+            "type": "string",
+            "description": "Статус партии",
+            "enum": [
+              "CREATED",
+              "SENT_TO_POST_OFFICE",
+              "ACCEPTED_AT_POST_OFFICE",
+              "RETURNED_TO_SENDER",
+              "DELETED"
+            ]
+          },
+          "batch-status-date": {
+            "type": "string",
+            "description": "Дата обновления статуса"
+          },
+          "bk-hash": {
+            "type": "integer",
+            "description": "Хэш-код бандероль-комплектов"
+          },
+          "branch-name": {
+            "type": "string",
+            "description": "Идентификатор подразделения"
+          },
+          "combined-batch-mail-types": {
+            "type": "array",
+            "description": "Вид РПО",
+            "items": {
+              "type": "string",
+              "enum": [
+                "UNDEFINED",
+                "POSTAL_PARCEL",
+                "ONLINE_PARCEL",
+                "ONLINE_COURIER",
+                "EMS",
+                "EMS_OPTIMAL",
+                "LETTER",
+                "BANDEROL",
+                "BUSINESS_COURIER",
+                "BUSINESS_COURIER_ES",
+                "PARCEL_CLASS_1",
+                "BANDEROL_CLASS_1",
+                "VGPO_CLASS_1",
+                "SMALL_PACKET",
+                "EASY_RETURN",
+                "VSD",
+                "ECOM",
+                "COMBINED"
+              ]
+            }
+          },
+          "courier-call-rate-with-vat": {
+            "type": "integer",
+            "description": "Плата за услугу \"Курьерский сбор\" с НДС"
+          },
+          "courier-call-rate-wo-vat": {
+            "type": "integer",
+            "description": "Плата за услугу \"Курьерский сбор\" без НДС"
+          },
+          "courier-order-statuses": {
+            "type": "array",
+            "description": "Статусы заявки на вызов курьера",
+            "items": {
+              "type": "string",
+              "enum": [
+                "NOT_REQUIRED",
+                "REQUIRED",
+                "CREATED",
+                "CANCELED",
+                "COMPLETED"
+              ]
+            }
+          },
+          "delivery-count": {
+            "type": "integer",
+            "description": "Количество отправленни, врученных адресату (для БК)"
+          },
+          "delivery-notice-payment-method": {
+            "type": "string",
+            "description": "Способ оплаты уведомления о вручении РПО",
+            "enum": [
+              "CASHLESS",
+              "STAMP",
+              "FRANKING"
+            ]
+          },
+          "document-download-status": {
+            "type": "string",
+            "description": "Статус загрузки документов",
+            "enum": [
+              "NEW_TRANSPORT_BLANK",
+              "PREPARED",
+              "DOWNLOADED"
+            ]
+          },
+          "electronic-f103": {
+            "type": "boolean"
+          },
+          "fragile-rate": {
+            "type": "integer",
+            "description": "Плата за услугу \"Осторожно, хрупкое, терморежим\" без НДС"
+          },
+          "fragile-rate-vat": {
+            "type": "integer",
+            "description": "Плата за услугу \"Осторожно, хрупкое, терморежим\" c НДС"
+          },
+          "group-name": {
+            "type": "string",
+            "description": "Наименование группы (для Многоместных отправлений см. ММО)"
+          },
+          "hyper-local-status": {
+            "type": "string",
+            "description": "Статус по гиперлокальной доставке"
+          },
+          "international": {
+            "type": "boolean",
+            "description": "Признак международной почты"
+          },
+          "is-postoffice-ukd": {
+            "type": "boolean",
+            "description": "Является ли место приема УКД"
+          },
+          "list-number": {
+            "type": "integer",
+            "description": "Номер документа для сдачи партии"
+          },
+          "list-number-date": {
+            "type": "string",
+            "description": "Дата документа для сдачи партии (yyyy-MM-dd)",
+            "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+          },
+          "mail-category": {
+            "type": "string",
+            "description": "Категория РПО",
+            "enum": [
+              "ORDERED",
+              "ORDINARY",
+              "WITH_DECLARED_VALUE",
+              "WITH_DECLARED_VALUE_AND_CASH_ON_DELIVERY",
+              "COMBINED"
+            ]
+          },
+          "mail-category-text": {
+            "type": "string",
+            "description": "Категория РПО (текст)"
+          },
+          "mail-rank": {
+            "type": "string",
+            "description": "Код разряда партии",
+            "enum": [
+              "WO_RANK",
+              "GOVERNMENT",
+              "MILITARY",
+              "OFFICIAL",
+              "JUDICIAL"
+            ]
+          },
+          "mail-type": {
+            "type": "string",
+            "description": "Вид РПО",
+            "enum": [
+              "UNDEFINED",
+              "POSTAL_PARCEL",
+              "ONLINE_PARCEL",
+              "ONLINE_COURIER",
+              "EMS",
+              "EMS_OPTIMAL",
+              "LETTER",
+              "BANDEROL",
+              "BUSINESS_COURIER",
+              "BUSINESS_COURIER_ES",
+              "PARCEL_CLASS_1",
+              "BANDEROL_CLASS_1",
+              "VGPO_CLASS_1",
+              "SMALL_PACKET",
+              "EASY_RETURN",
+              "VSD",
+              "ECOM",
+              "COMBINED"
+            ]
+          },
+          "mail-type-text": {
+            "type": "string",
+            "description": "Вид РПО (текст)"
+          },
+          "notice-payment-method": {
+            "type": "string",
+            "description": "Способ оплаты",
+            "enum": [
+              "CASHLESS",
+              "STAMP",
+              "FRANKING"
+            ]
+          },
+          "payment-method": {
+            "type": "string",
+            "description": "Способ оплаты",
+            "enum": [
+              "CASHLESS",
+              "STAMP",
+              "FRANKING"
+            ]
+          },
+          "person-code": {
+            "type": "string",
+            "description": "Идентификатор пользователя"
+          },
+          "postmarks": {
+            "type": "array",
+            "description": "Коды отметок внутренних и международных отправлений",
+            "items": {
+              "type": "string",
+              "enum": [
+                "WITHOUT_MARK",
+                "FRAGILE",
+                "THERMO_MODE"
+              ]
+            }
+          },
+          "postoffice-address": {
+            "type": "string",
+            "description": "Адрес места приема"
+          },
+          "postoffice-code": {
+            "type": "string",
+            "description": "Индекс места приема"
+          },
+          "postoffice-name": {
+            "type": "string",
+            "description": "Наименование места приема"
+          },
+          "pre-postal-preparation": {
+            "type": "boolean",
+            "description": "Предпочтовая подготовка"
+          },
+          "shipment-avia-rate-sum": {
+            "type": "integer",
+            "description": "Сумма платы за авиа пересылку в копейках, без НДС"
+          },
+          "shipment-avia-rate-vat-sum": {
+            "type": "integer",
+            "description": "НДС от суммы платы за авиа пересылку в копейках"
+          },
+          "shipment-completeness-checking-rate-sum": {
+            "type": "integer",
+            "description": "Сумма платы за проверку комплектности в копейках, без НДС"
+          },
+          "shipment-completeness-checking-rate-vat-sum": {
+            "type": "integer",
+            "description": "НДС от суммы платы за проверку комплектности в копейках"
+          },
+          "shipment-contents-checking-rate-sum": {
+            "type": "integer",
+            "description": "Сумма платы за проверку вложений в копейках, без НДС"
+          },
+          "shipment-contents-checking-rate-vat-sum": {
+            "type": "integer",
+            "description": "НДС от суммы платы за проверку вложений в копейках"
+          },
+          "shipment-count": {
+            "type": "integer",
+            "description": "Количество заказов в партии"
+          },
+          "shipment-functionality-checking-rate-sum": {
+            "type": "integer",
+            "description": "Сумма платы за проверку вложений с проверкой функциональности в копейках, без НДС"
+          },
+          "shipment-functionality-checking-rate-vat-sum": {
+            "type": "integer",
+            "description": "НДС от суммы платы за проверку вложений с проверкой функциональности в копейках"
+          },
+          "shipment-ground-rate-sum": {
+            "type": "integer",
+            "description": "Сумма платы за наземную пересылку в копейках, без НДС"
+          },
+          "shipment-ground-rate-vat-sum": {
+            "type": "integer",
+            "description": "НДС от суммы платы за наземную пересылку в копейках"
+          },
+          "shipment-insure-rate-sum": {
+            "type": "integer",
+            "description": "Сумма платы за объявленную ценность в копейках, без НДС"
+          },
+          "shipment-insure-rate-vat-sum": {
+            "type": "integer",
+            "description": "НДС от суммы платы за объявленную ценность в копейках"
+          },
+          "shipment-inventory-rate-sum": {
+            "type": "integer",
+            "description": "Сумма платы за опись вложения в копейках, без НДС"
+          },
+          "shipment-inventory-rate-vat-sum": {
+            "type": "integer",
+            "description": "НДС от суммы платы за опись вложения в копейках, без НДС"
+          },
+          "shipment-mass": {
+            "type": "integer",
+            "description": "Общий вес в граммах"
+          },
+          "shipment-mass-rate-sum": {
+            "type": "integer",
+            "description": "Сумма платы за пересылку в копейках, без НДС"
+          },
+          "shipment-mass-rate-vat-sum": {
+            "type": "integer",
+            "description": "НДС от суммы платы за пересылку в копейках"
+          },
+          "shipment-notice-rate-sum": {
+            "type": "integer",
+            "description": "Сумма надбавки за уведомление о вручении в копейках"
+          },
+          "shipment-notice-rate-vat-sum": {
+            "type": "integer",
+            "description": "НДС от суммы надбавки за уведомление о вручении в копейках"
+          },
+          "shipment-partial-redemption-rate-sum": {
+            "type": "integer",
+            "description": "Сумма платы за частичный выкуп в копейках, без НДС"
+          },
+          "shipment-partial-redemption-rate-vat-sum": {
+            "type": "integer",
+            "description": "НДС от суммы платы за частичный выкуп в копейках"
+          },
+          "shipment-pre-postal-preparation-rate-sum": {
+            "type": "integer",
+            "description": "Сумма платы за услугу 'Предпочтовая подготовка' в копейках, без НДС"
+          },
+          "shipment-pre-postal-preparation-rate-vat-sum": {
+            "type": "integer",
+            "description": "НДС от суммы платы за услугу 'Предпочтовая подготовка' в копейках"
+          },
+          "shipment-sms-notice-rate-sum": {
+            "type": "integer",
+            "description": "Сумма платы за смс нотификацию в копейках, без НДС"
+          },
+          "shipment-sms-notice-rate-vat-sum": {
+            "type": "integer",
+            "description": "НДС от суммы платы за смс нотификацию в копейках"
+          },
+          "shipment-with-fitting-rate-sum": {
+            "type": "integer",
+            "description": "Сумма платы за проверку вложений с примеркой в копейках, без НДС"
+          },
+          "shipment-with-fitting-rate-vat-sum": {
+            "type": "integer",
+            "description": "НДС от суммы платы за проверку вложений с примеркой в копейках"
+          },
+          "shipping-notice-type": {
+            "type": "string",
+            "description": "Категория уведомления о вручении РПО",
+            "enum": [
+              "SIMPLE",
+              "REGISTERED",
+              "COMBINED"
+            ]
+          },
+          "transport-type": {
+            "type": "string",
+            "description": "Вид транспортировки",
+            "enum": [
+              "SURFACE",
+              "AVIA",
+              "COMBINED",
+              "STANDARD",
+              "EXPRESS"
+            ]
+          },
+          "ukd": {
+            "type": "boolean"
+          },
+          "use-online-balance": {
+            "type": "boolean",
+            "description": "Признак использования онлайн-баланса"
+          },
+          "wo-mass": {
+            "type": "boolean",
+            "description": "Без указания массы"
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,762 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Почта России - Схема настроек пользователя",
+  "description": "JSON Schema для ответа API получения настроек пользователя Почты России",
+  "definitions": {
+    "Address": {
+      "type": "object",
+      "description": "Адрес возврата",
+      "required": ["address-type", "index", "place", "region"],
+      "properties": {
+        "address-type": {
+          "type": "string",
+          "description": "Тип адреса",
+          "enum": ["DEFAULT"]
+        },
+        "area": {
+          "type": "string",
+          "description": "Район"
+        },
+        "building": {
+          "type": "string",
+          "description": "Часть здания: Строение"
+        },
+        "corpus": {
+          "type": "string",
+          "description": "Часть здания: Корпус"
+        },
+        "hotel": {
+          "type": "string",
+          "description": "Название гостиницы"
+        },
+        "house": {
+          "type": "string",
+          "description": "Часть адреса: Номер здания"
+        },
+        "index": {
+          "type": "string",
+          "description": "Почтовый индекс"
+        },
+        "letter": {
+          "type": "string",
+          "description": "Часть здания: Литера"
+        },
+        "location": {
+          "type": "string",
+          "description": "Микрорайон"
+        },
+        "manual-address-input": {
+          "type": "boolean",
+          "description": "Признак ручного ввода адреса"
+        },
+        "num-address-type": {
+          "type": "string",
+          "description": "Номер для а/я, войсковая часть, войсковая часть ЮЯ, полевая почта"
+        },
+        "office": {
+          "type": "string",
+          "description": "Часть здания: Офис"
+        },
+        "place": {
+          "type": "string",
+          "description": "Населенный пункт"
+        },
+        "region": {
+          "type": "string",
+          "description": "Область, регион"
+        },
+        "room": {
+          "type": "string",
+          "description": "Часть здания: Номер помещения"
+        },
+        "slash": {
+          "type": "string",
+          "description": "Часть здания: Дробь"
+        },
+        "street": {
+          "type": "string",
+          "description": "Часть адреса: Улица"
+        },
+        "vladenie": {
+          "type": "string",
+          "description": "Часть адреса: Владение"
+        }
+      }
+    },
+    "ReturnAddress": {
+      "type": "object",
+      "description": "Адрес возврата",
+      "required": ["return-address-id"],
+      "properties": {
+        "address": {
+          "$ref": "#/definitions/Address"
+        },
+        "return-address-id": {
+          "type": "integer",
+          "description": "Идентификатор адреса возврата"
+        }
+      }
+    },
+    "Product": {
+      "type": "object",
+      "description": "Продукт почтового отправления",
+      "required": ["mail-category", "mail-type", "product-type", "sms-notice-recipient-enabled"],
+      "properties": {
+        "mail-category": {
+          "type": "string",
+          "description": "Категория почтового отправления",
+          "enum": ["SIMPLE"]
+        },
+        "mail-type": {
+          "type": "string",
+          "description": "Тип почтового отправления",
+          "enum": ["UNDEFINED"]
+        },
+        "product-type": {
+          "type": "string",
+          "description": "Тип продукта",
+          "enum": ["LETTER_ORDERED"]
+        },
+        "sms-notice-recipient-enabled": {
+          "type": "boolean",
+          "description": "Признак доступности услуги SMS уведомления получателя"
+        }
+      }
+    },
+    "ShippingPoint": {
+      "type": "object",
+      "description": "Точка сдачи",
+      "required": ["operator-postcode"],
+      "properties": {
+        "additional-operator-postcode": {
+          "type": "string",
+          "description": "ДТИ (дополнительный технический индекс). Deprecated. Supported for back compatibility only. Use 'additional-operator-postcodes' instead."
+        },
+        "additional-operator-postcodes": {
+          "type": "array",
+          "description": "Список ДТИ (дополнительный технический индекс)",
+          "items": {
+            "type": "string"
+          }
+        },
+        "available-additional-operator-postcodes": {
+          "type": "array",
+          "description": "Список доступных ДТИ (дополнительный технический индекс)",
+          "items": {
+            "type": "string"
+          }
+        },
+        "available-mail-types": {
+          "type": "array",
+          "description": "Разрешенные почтовые типы отправлений",
+          "items": {
+            "type": "string",
+            "enum": ["UNDEFINED"]
+          }
+        },
+        "available-products": {
+          "type": "array",
+          "description": "Список доступных продуктов",
+          "items": {
+            "$ref": "#/definitions/Product"
+          }
+        },
+        "available-return-addresses": {
+          "type": "array",
+          "description": "Доступные адреса возврата в точке сдачи",
+          "items": {
+            "$ref": "#/definitions/ReturnAddress"
+          }
+        },
+        "courier-call": {
+          "type": "boolean",
+          "description": "Признак доступности услуги 'Вызов курьера'"
+        },
+        "enabled": {
+          "type": "boolean",
+          "description": "Признак активации"
+        },
+        "operator-postcode": {
+          "type": "string",
+          "description": "Индекс почтового отделения обслуживания"
+        },
+        "ops-address": {
+          "type": "string",
+          "description": "Адрес ОПС"
+        },
+        "po-box": {
+          "type": "string",
+          "description": "Номер абонентского ящика"
+        },
+        "pre-postal-preparation": {
+          "type": "boolean",
+          "description": "Признак доступности услуги 'Предпочтовая подготовка'"
+        },
+        "return-address": {
+          "type": "object",
+          "description": "Адрес возврата, выбранный в точке сдачи",
+          "properties": {
+            "address": {
+              "$ref": "#/definitions/Address"
+            },
+            "return-address-id": {
+              "type": "integer",
+              "description": "Идентификатор адреса возврата"
+            }
+          }
+        },
+        "return-address-type": {
+          "type": "string",
+          "description": "Тип адреса возврата",
+          "enum": ["SENDER_ADDRESS"]
+        },
+        "user-available-mail-types": {
+          "type": "array",
+          "description": "Разрешенные почтовые типы отправлений для пользователя",
+          "items": {
+            "type": "string",
+            "enum": ["UNDEFINED"]
+          }
+        },
+        "user-available-products": {
+          "type": "array",
+          "description": "Список доступных продуктов для пользователя",
+          "items": {
+            "$ref": "#/definitions/Product"
+          }
+        },
+        "user-return-address": {
+          "$ref": "#/definitions/Address",
+          "description": "Адрес, установленный пользователем"
+        },
+        "vsd-enabled": {
+          "type": "boolean",
+          "description": "Признак доступности услуги 'Возврат сопроводительных документов'"
+        }
+      }
+    },
+    "Account": {
+      "type": "object",
+      "description": "Компания",
+      "required": ["blocked"],
+      "properties": {
+        "address": {
+          "type": "string",
+          "description": "Адрес возврата"
+        },
+        "blocked": {
+          "type": "boolean",
+          "description": "Признак блокировки"
+        },
+        "email": {
+          "type": "string",
+          "description": "Контактный email"
+        },
+        "is-admin": {
+          "type": "boolean",
+          "description": "Признак администратора"
+        },
+        "legal-hid": {
+          "type": "string",
+          "description": "Идентификатор компании (ЮЛ)"
+        },
+        "org-inn": {
+          "type": "string",
+          "description": "ИНН"
+        },
+        "org-name": {
+          "type": "string",
+          "description": "Наименование"
+        }
+      }
+    },
+    "ErlOrderForm": {
+      "type": "object",
+      "description": "Бланк заказа для ЭЗП",
+      "required": ["mail-category"],
+      "properties": {
+        "mail-category": {
+          "type": "string",
+          "description": "Категория почтового отправления",
+          "enum": ["SIMPLE"]
+        },
+        "order-form-date": {
+          "type": "string",
+          "description": "Дата бланка заказа"
+        },
+        "order-form-id": {
+          "type": "integer",
+          "description": "Номер бланка закза"
+        },
+        "order-form-number": {
+          "type": "string",
+          "description": "Номер бланка закза"
+        }
+      }
+    },
+    "MailingOptionValue": {
+      "type": "object",
+      "description": "Значение опции отправления",
+      "required": ["key", "value"],
+      "properties": {
+        "key": {
+          "type": "string",
+          "description": "Свойство",
+          "enum": [
+            "PRINT_TYPE",
+            "PRINT_F112",
+            "PAYMENT_METHOD",
+            "ENVELOPE_TYPE",
+            "PRINT_FORM",
+            "PRINT_FORM_TYPE",
+            "NOTICE_PAYMENT_METHOD",
+            "TRANSPORT_TYPE",
+            "PRINT_ORDER_NUM",
+            "PRINT_TOTAL_COST",
+            "PRINT_NO_RETURN",
+            "PRINT_ON_PAGE_OPTION",
+            "PRINT_COMMENT",
+            "GROUP_F103F"
+          ]
+        },
+        "value": {
+          "type": "string",
+          "description": "Значение свойства"
+        }
+      }
+    },
+    "MailingOption": {
+      "type": "object",
+      "description": "Опция отправления",
+      "required": ["key", "value"],
+      "properties": {
+        "key": {
+          "type": "string",
+          "description": "Свойство",
+          "enum": [
+            "POSTAL_PARCEL",
+            "PRINT_TYPE",
+            "PRINT_F112",
+            "PAYMENT_METHOD",
+            "ENVELOPE_TYPE",
+            "PRINT_FORM",
+            "PRINT_FORM_TYPE",
+            "NOTICE_PAYMENT_METHOD",
+            "TRANSPORT_TYPE",
+            "PRINT_ORDER_NUM",
+            "PRINT_TOTAL_COST",
+            "PRINT_NO_RETURN",
+            "PRINT_ON_PAGE_OPTION",
+            "PRINT_COMMENT",
+            "GROUP_F103F"
+          ]
+        },
+        "value": {
+          "type": "array",
+          "description": "Значение свойства",
+          "items": {
+            "$ref": "#/definitions/MailingOptionValue"
+          }
+        }
+      }
+    },
+    "response": {
+      "type": "object",
+      "description": "Ответ API настроек пользователя",
+      "required": [
+        "account-admin",
+        "account-erl-enabled",
+        "address-book-enabled",
+        "address-change-enabled",
+        "admin-hid",
+        "api_enabled",
+        "apig_access_token",
+        "blocked",
+        "delivery_with-cod_enabled",
+        "direct-addition-to-batch-enabled",
+        "easy-return",
+        "erl-enabled",
+        "fulfillment-enabled",
+        "hid",
+        "hyper-local-delivery",
+        "is-cargo",
+        "is-cod-lending",
+        "mailing-option",
+        "mmo-auto-enabled",
+        "mmo-enabled",
+        "postal-groups",
+        "print-from-backlog",
+        "raw_tel_address_enabled",
+        "regions",
+        "report-version",
+        "show-returns",
+        "tel-address-custom-cleaning",
+        "use-branch-name",
+        "use-person-code",
+        "zoo-simple"
+      ],
+      "properties": {
+        "account-admin": {
+          "type": "boolean",
+          "description": "Признак администратора акканта"
+        },
+        "account-declaration-enabled": {
+          "type": "boolean",
+          "description": "Доступность подачи электронной декларации для сабаккаунта"
+        },
+        "account-erl-enabled": {
+          "type": "boolean",
+          "description": "Доступность функционала ЭЗП для сабаккаунта"
+        },
+        "account-esignature-enabled": {
+          "type": "boolean",
+          "description": "Флаг использования электронной подписи для сабаккаунта"
+        },
+        "accounts": {
+          "type": "array",
+          "description": "Список компаний",
+          "items": {
+            "$ref": "#/definitions/Account"
+          }
+        },
+        "address": {
+          "$ref": "#/definitions/Address",
+          "description": "Адрес возврата"
+        },
+        "address-book-enabled": {
+          "type": "boolean",
+          "description": "Адресная книга включена"
+        },
+        "address-change-enabled": {
+          "type": "boolean",
+          "description": "Флаг разрешения функционала проверки изменения адреса получателя"
+        },
+        "admin-hid": {
+          "type": "string",
+          "description": "Внутренний идентификатор администратора"
+        },
+        "agreement-date": {
+          "type": "string",
+          "description": "Дата договора (yyyy-MM-dd)"
+        },
+        "agreement-kind": {
+          "type": "string",
+          "description": "Agreement kind",
+          "enum": ["CONTRACT", "PUBLIC_OFFER", "CONTRACT_ELECTRONIC"]
+        },
+        "agreement-number": {
+          "type": "string",
+          "description": "Номер договора"
+        },
+        "agreement-version": {
+          "type": "string",
+          "description": "Agreement version"
+        },
+        "api_enabled": {
+          "type": "boolean",
+          "description": "Флаг доступа к API"
+        },
+        "apig_access_token": {
+          "type": "string",
+          "description": "API Gateway access token"
+        },
+        "available-shipping-points": {
+          "type": "array",
+          "description": "Все точки сдачи",
+          "items": {
+            "$ref": "#/definitions/ShippingPoint"
+          }
+        },
+        "blocked": {
+          "type": "boolean",
+          "description": "Признак блокировки"
+        },
+        "branch-name": {
+          "type": "string",
+          "description": "Название филиала"
+        },
+        "branch-names": {
+          "type": "array",
+          "description": "Список возможных наименований подразделений",
+          "items": {
+            "type": "string"
+          }
+        },
+        "brand-name": {
+          "type": "string",
+          "description": "Отправитель на посылке/название брэнда"
+        },
+        "cargo": {
+          "type": "boolean"
+        },
+        "client-category": {
+          "type": "string",
+          "description": "Категория клиента (Региональный или Федеральный)",
+          "enum": ["FEDERAL", "REGIONAL"]
+        },
+        "codLending": {
+          "type": "boolean"
+        },
+        "contact-email": {
+          "type": "string",
+          "description": "Контактный email"
+        },
+        "contact-phone": {
+          "type": "integer",
+          "description": "Контактный телефон"
+        },
+        "customs-code": {
+          "type": "string",
+          "description": "Код таможенного органа по умолчанию"
+        },
+        "declaration-enabled": {
+          "type": "boolean",
+          "description": "Доступность подачи электронной декларации"
+        },
+        "def-envelope-type": {
+          "type": "string",
+          "description": "Тип конверта по умолчанию",
+          "enum": ["C4"]
+        },
+        "def-payment-method": {
+          "type": "string",
+          "description": "Способ оплаты по умолчанию",
+          "enum": ["CASHLESS"]
+        },
+        "delivery_with-cod_enabled": {
+          "type": "boolean",
+          "description": "Флаг доступа к услуге Оплата при доставке"
+        },
+        "direct-addition-to-batch-enabled": {
+          "type": "boolean",
+          "description": "Флаг разрешения добавления шипментов в партию минуя бэклог"
+        },
+        "easy-return": {
+          "type": "boolean",
+          "description": "Лёгкий возврат"
+        },
+        "ems-tender-payment-enabled": {
+          "type": "boolean",
+          "description": "Доступность наложенного платежа у EMS Тендер"
+        },
+        "erl-agreement-date": {
+          "type": "string",
+          "description": "Дата договора ЭЗП"
+        },
+        "erl-agreement-number": {
+          "type": "string",
+          "description": "Номер договора ЭЗП"
+        },
+        "erl-customer-id": {
+          "type": "string",
+          "description": "идентификатор пользователя в системеЭЗП"
+        },
+        "erl-customer-token": {
+          "type": "string",
+          "description": "секретный ключ пользователя в системеЭЗП"
+        },
+        "erl-enabled": {
+          "type": "boolean",
+          "description": "Доступность функционала ЭЗП"
+        },
+        "erl-order-forms": {
+          "type": "array",
+          "description": "Бланки заказов для ЭЗП",
+          "items": {
+            "$ref": "#/definitions/ErlOrderForm"
+          }
+        },
+        "esignature-agreement-accepted": {
+          "type": "boolean",
+          "description": "Флаг, что пользователь принял соглашение по электронной подписи"
+        },
+        "esignature-enabled": {
+          "type": "boolean",
+          "description": "Флаг использования электронной подписи"
+        },
+        "espp-cod-code": {
+          "type": "string",
+          "description": "ЕСПП код для COD"
+        },
+        "espp-code": {
+          "type": "string",
+          "description": "ЕСПП код"
+        },
+        "extension-shelf-life-ecom": {
+          "type": "boolean",
+          "description": "Доступность продления срока хранения(ЕКОМ)"
+        },
+        "fulfillment-enabled": {
+          "type": "boolean",
+          "description": "Доступность фулфилмента"
+        },
+        "hid": {
+          "type": "string",
+          "description": "Внутренний идентификатор"
+        },
+        "hyper-local-delivery": {
+          "type": "boolean",
+          "description": "Доступность гиперлокальной доставки"
+        },
+        "is-alcoholic-beverages": {
+          "type": "boolean",
+          "description": "Доступность алкогольной продукции"
+        },
+        "is-cargo": {
+          "type": "boolean",
+          "description": "Доступность транспортных услуг"
+        },
+        "is-cod-lending": {
+          "type": "boolean",
+          "description": "Доступность услуги \"Финансирование под НП\""
+        },
+        "legal-address": {
+          "type": "string",
+          "description": "Юридический адрес"
+        },
+        "legal-hid": {
+          "type": "string",
+          "description": "Идентификатор компании (ЮЛ)"
+        },
+        "mail-rank": {
+          "type": "string",
+          "description": "Код разряда почтового отправления",
+          "enum": ["WO_RANK"]
+        },
+        "mailing-option": {
+          "type": "array",
+          "description": "Опции отправлений",
+          "items": {
+            "$ref": "#/definitions/MailingOption"
+          }
+        },
+        "mmo-auto-enabled": {
+          "type": "boolean",
+          "description": "Доступность автоматической сборки в ММО"
+        },
+        "mmo-enabled": {
+          "type": "boolean",
+          "description": "Доступность ММО"
+        },
+        "online-balance-enabled": {
+          "type": "boolean",
+          "description": "Признак использования онлайн баланса"
+        },
+        "only-signature": {
+          "type": "boolean",
+          "description": "Доступ только к электронному документообороту"
+        },
+        "org-inn": {
+          "type": "string",
+          "description": "ИНН"
+        },
+        "org-kpp": {
+          "type": "string",
+          "description": "КПП организации"
+        },
+        "org-name": {
+          "type": "string",
+          "description": "Наименование"
+        },
+        "org-name-international": {
+          "type": "string",
+          "description": "Наименование организации на латинице"
+        },
+        "person-code": {
+          "type": "string",
+          "description": "Идентификатор пользователя"
+        },
+        "person-codes": {
+          "type": "array",
+          "description": "Список возможных идентификаторов пользователей",
+          "items": {
+            "type": "string"
+          }
+        },
+        "planned-monthly-number": {
+          "type": "integer",
+          "description": "Планируемое количество отправлений в месяц"
+        },
+        "postal-groups": {
+          "type": "array",
+          "description": "Спсиок типов почтовых отправлений письма/посылки",
+          "items": {
+            "type": "string",
+            "enum": ["PARCELS"]
+          }
+        },
+        "print-from-backlog": {
+          "type": "boolean",
+          "description": "Печать из раздела \"Новые\""
+        },
+        "print-type": {
+          "type": "string",
+          "description": "Тип печати",
+          "enum": ["PAPER"]
+        },
+        "raw_tel_address_enabled": {
+          "type": "boolean",
+          "description": "Флаг доступа к вводу альтернативого адреса получателя"
+        },
+        "regions": {
+          "type": "array",
+          "description": "Регион обслуживания",
+          "items": {
+            "type": "string"
+          }
+        },
+        "report-version": {
+          "type": "integer",
+          "description": "Версия отчета"
+        },
+        "sender-category": {
+          "type": "string",
+          "description": "Категория отправителя",
+          "enum": [
+            "PEOPLE",
+            "BUDGETARY_ORGANIZATION",
+            "SELF_SUPPORTING_ORGANIZATIONS",
+            "INTERNATIONAL_OPERATOR",
+            "CORPORATE_CLIENT",
+            "POSTAL_OPERATOR"
+          ]
+        },
+        "sender-name": {
+          "type": "string",
+          "description": "Наименования сабэкаунта как отправителя"
+        },
+        "shipping-points": {
+          "type": "array",
+          "description": "Доступные точки сдачи",
+          "items": {
+            "$ref": "#/definitions/ShippingPoint"
+          }
+        },
+        "show-returns": {
+          "type": "boolean",
+          "description": "Видимость возвратов"
+        },
+        "tel-address-custom-cleaning": {
+          "type": "boolean",
+          "description": "Флаг собственной кастомной очистки телефона"
+        },
+        "use-branch-name": {
+          "type": "boolean",
+          "description": "Флаг разрешения функционала название филиала"
+        },
+        "use-person-code": {
+          "type": "boolean",
+          "description": "Доступность PersonCode"
+        },
+        "user-lock-initiator-email": {
+          "type": "string",
+          "description": "Email инициатора блокировки пользователя"
+        },
+        "zoo-simple": {
+          "type": "boolean",
+          "description": "Доступность простых писем и бандеролей со знаком онлайн оплаты"
+        }
+      }
+    }
+  }
+}

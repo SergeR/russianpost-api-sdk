@@ -1,0 +1,22 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://api.pochta.ru/schemas/postoffice-settlement-codes-schema.json",
+  "title": "Почта России - Схема ответа почтовых индексов",
+  "description": "JSON Schema для ответа API получения почтовых индексов населенных пунктов",
+  "definitions": {
+    "response": {
+      "type": "array",
+      "description": "Массив почтовых индексов",
+      "items": {
+        "type": "string",
+        "description": "Почтовый индекс",
+        "pattern": "^[0-9]{6}$",
+        "minLength": 6,
+        "maxLength": 6
+      },
+      "minItems": 0
+    }
+  },
+  "type": "array",
+  "$ref": "#/definitions/response"
+}

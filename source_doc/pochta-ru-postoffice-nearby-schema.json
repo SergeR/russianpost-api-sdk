@@ -1,0 +1,179 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Почта России - Поиск ближайших почтовых отделений",
+  "description": "Схема ответа API для получения списка ближайших почтовых отделений",
+  "definitions": {
+    "lunch": {
+      "type": "object",
+      "description": "Перерыв",
+      "properties": {}
+    },
+    "workingHours": {
+      "type": "object",
+      "description": "Время работы",
+      "properties": {
+        "lunches": {
+          "type": "array",
+          "description": "Перерывы",
+          "items": {
+            "$ref": "#/definitions/lunch"
+          }
+        },
+        "weekday-id": {
+          "type": "integer",
+          "description": "Номер дня в неделе"
+        },
+        "weekday-name": {
+          "type": "string",
+          "description": "Наименование дня в неделе"
+        }
+      }
+    },
+    "holiday": {
+      "type": "object",
+      "description": "Выходной день",
+      "properties": {
+        "date": {
+          "type": "string",
+          "description": "Дата"
+        },
+        "schedule": {
+          "type": "object",
+          "description": "Рабочий день",
+          "properties": {
+            "lunches": {
+              "type": "array",
+              "description": "Перерывы",
+              "items": {
+                "$ref": "#/definitions/lunch"
+              }
+            },
+            "weekday-id": {
+              "type": "integer",
+              "description": "Номер дня в неделе"
+            },
+            "weekday-name": {
+              "type": "string",
+              "description": "Наименование дня в неделе"
+            }
+          }
+        }
+      }
+    },
+    "postOffice": {
+      "type": "object",
+      "description": "Информация о почтовом отделении",
+      "required": [
+        "address-source",
+        "latitude",
+        "longitude",
+        "postal-code",
+        "type-code",
+        "type-id"
+      ],
+      "properties": {
+        "address-source": {
+          "type": "string",
+          "description": "Адрес отделения"
+        },
+        "current-day-working-hours": {
+          "$ref": "#/definitions/workingHours",
+          "description": "Рабочие часы в текущее время"
+        },
+        "distance": {
+          "type": "number",
+          "description": "Расстояние до отделения"
+        },
+        "district": {
+          "type": "string",
+          "description": "Округ"
+        },
+        "holidays": {
+          "type": "array",
+          "description": "Выходные",
+          "items": {
+            "$ref": "#/definitions/holiday"
+          }
+        },
+        "is-closed": {
+          "type": "boolean",
+          "description": "Признак 'закрыто'"
+        },
+        "is-private-category": {
+          "type": "boolean",
+          "description": "Признак внутреннего отделения"
+        },
+        "is-temporary-closed": {
+          "type": "boolean",
+          "description": "Признак 'временно закрыто'"
+        },
+        "latitude": {
+          "type": "number",
+          "description": "Широта"
+        },
+        "longitude": {
+          "type": "number",
+          "description": "Долгота"
+        },
+        "nearest-office-postalcode": {
+          "type": "string",
+          "description": "Индекс ближайшего почтового отделения"
+        },
+        "next-day-working-hours": {
+          "$ref": "#/definitions/workingHours",
+          "description": "Рабочие часы в следующий рабочий день"
+        },
+        "postal-code": {
+          "type": "string",
+          "description": "Индекс почтового отделения"
+        },
+        "prescribed": {
+          "type": "boolean",
+          "description": "Предписанный"
+        },
+        "region": {
+          "type": "string",
+          "description": "Область, край"
+        },
+        "settlement": {
+          "type": "string",
+          "description": "Поселение"
+        },
+        "temporary-closed-reason": {
+          "type": "string",
+          "description": "Причина 'временно закрыто'"
+        },
+        "type-code": {
+          "type": "string",
+          "description": "Тип отделения"
+        },
+        "type-id": {
+          "type": "integer",
+          "description": "Идентификатор типа отделения"
+        },
+        "working-hours": {
+          "type": "array",
+          "description": "Рабочие часы",
+          "items": {
+            "$ref": "#/definitions/workingHours"
+          }
+        },
+        "works-on-saturdays": {
+          "type": "boolean",
+          "description": "Признак работы в субботу"
+        },
+        "works-on-sundays": {
+          "type": "boolean",
+          "description": "Признак работы в воскресенье"
+        }
+      }
+    },
+    "response": {
+      "type": "array",
+      "description": "Список ближайших почтовых отделений",
+      "items": {
+        "$ref": "#/definitions/postOffice"
+      }
+    }
+  }
+}

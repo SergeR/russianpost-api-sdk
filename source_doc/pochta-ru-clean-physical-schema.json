@@ -1,0 +1,82 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://pochta.ru/api/schemas/clean-physical-schema.json",
+  "title": "Схема API очистки ФИО Почты России",
+  "description": "JSON Schema для нормализации физических лиц (ФИО)",
+  "definitions": {
+    "request": {
+      "type": "array",
+      "description": "Массив запросов на очистку ФИО",
+      "items": {
+        "type": "object",
+        "description": "Объект запроса с данными для нормализации",
+        "required": [
+          "id",
+          "original-fio"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Идентификатор записи"
+          },
+          "original-fio": {
+            "type": "string",
+            "description": "Оригинальные фамилия, имя, отчество одной строкой"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "response": {
+      "type": "array",
+      "description": "Массив ответов с нормализованными ФИО",
+      "items": {
+        "type": "object",
+        "description": "Объект ответа с результатами нормализации",
+        "required": [
+          "id",
+          "original-fio",
+          "quality-code",
+          "valid"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Идентификатор записи"
+          },
+          "middle-name": {
+            "type": "string",
+            "description": "Отчество"
+          },
+          "name": {
+            "type": "string",
+            "description": "Имя"
+          },
+          "original-fio": {
+            "type": "string",
+            "description": "Оригинальные фамилия, имя, отчество одной строкой"
+          },
+          "quality-code": {
+            "type": "string",
+            "description": "Код качества нормализации ФИО",
+            "enum": [
+              "CONFIRMED_MANUALLY",
+              "CONFIRMED",
+              "NOT_CONFIRMED_AUTO",
+              "NOT_CONFIRMED_MANUALLY"
+            ]
+          },
+          "surname": {
+            "type": "string",
+            "description": "Фамилия"
+          },
+          "valid": {
+            "type": "boolean",
+            "description": "Приемлемое ли качество произведенной очистки?"
+          }
+        },
+        "additionalProperties": false
+      }
+    }
+  }
+}

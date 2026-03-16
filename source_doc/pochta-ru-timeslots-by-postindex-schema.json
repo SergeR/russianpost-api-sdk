@@ -1,0 +1,73 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Pochta Russia Timeslots API Schema",
+  "description": "JSON Schema для API получения доступных таймслотов по почтовому индексу",
+  "definitions": {
+    "response": {
+      "type": "object",
+      "description": "Структура ответа API для получения списка доступных слотов предварительного бронирования",
+      "required": [
+        "uuid",
+        "timeslots"
+      ],
+      "properties": {
+        "uuid": {
+          "type": "string",
+          "format": "uuid",
+          "description": "Уникальный идентификатор для предварительного бронирования",
+          "example": "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+        },
+        "timeslots": {
+          "type": "array",
+          "description": "Список доступных слотов",
+          "items": {
+            "$ref": "#/definitions/timeslot"
+          }
+        }
+      }
+    },
+    "timeslot": {
+      "type": "object",
+      "description": "Информация о временном слоте для бронирования",
+      "required": [
+        "id",
+        "date",
+        "beginTime",
+        "endTime",
+        "capacity"
+      ],
+      "properties": {
+        "id": {
+          "type": "integer",
+          "description": "Идентификатор",
+          "example": 0
+        },
+        "date": {
+          "type": "string",
+          "format": "date",
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+          "description": "Дата действия",
+          "example": "2022-12-07"
+        },
+        "beginTime": {
+          "type": "string",
+          "pattern": "^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$",
+          "description": "Время с которого действует (например, 09:00)",
+          "example": "09:00"
+        },
+        "endTime": {
+          "type": "string",
+          "pattern": "^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$",
+          "description": "Время до которого действует (например, 18:00)",
+          "example": "18:00"
+        },
+        "capacity": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Емкость таймслота",
+          "example": 0
+        }
+      }
+    }
+  }
+}

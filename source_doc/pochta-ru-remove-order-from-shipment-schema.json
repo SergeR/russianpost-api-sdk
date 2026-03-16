@@ -1,0 +1,55 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://otpravka-api.pochta.ru/schemas/remove-order-from-shipment",
+  "title": "Удаление заказов из партии",
+  "description": "JSON Schema для API Почты России - удаление заказов из партии отправлений",
+  "definitions": {
+    "request": {
+      "type": "array",
+      "description": "Список внутренних идентификаторов заказов",
+      "items": {
+        "type": "integer",
+        "description": "Внутренний идентификатор заказа"
+      },
+      "minItems": 1
+    },
+    "response": {
+      "type": "object",
+      "description": "Результат удаления заказов из партии",
+      "properties": {
+        "errors": {
+          "type": "array",
+          "description": "Список ошибок",
+          "items": {
+            "type": "object",
+            "description": "Информация об ошибке",
+            "properties": {
+              "error-code": {
+                "type": "string",
+                "description": "Код ошибки",
+                "enum": ["UNDEFINED"]
+              },
+              "error-details": {
+                "type": "string",
+                "description": "Описание ошибки"
+              },
+              "position": {
+                "type": "integer",
+                "description": "Индекс в исходном массиве",
+                "minimum": 0
+              }
+            }
+          }
+        },
+        "result-ids": {
+          "type": "array",
+          "description": "Список успешно удаленных из партии внутренних идентификаторов отправлений",
+          "items": {
+            "type": "integer",
+            "description": "Внутренний идентификатор заказа"
+          }
+        }
+      }
+    }
+  }
+}

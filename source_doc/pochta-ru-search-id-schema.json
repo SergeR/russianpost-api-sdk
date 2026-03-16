@@ -1,0 +1,937 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Pochta Russia API Response Schema",
+  "description": "Схема ответа API Почты России для поиска отправления по ID",
+  "definitions": {
+    "response": {
+      "type": "object",
+      "properties": {
+        "add-to-mmo": {
+          "type": "boolean",
+          "description": "Отметка 'Добавить в многоместное отправление'"
+        },
+        "address-changed": {
+          "type": "boolean",
+          "description": "Адрес получателя скорректирован в процессе очистки"
+        },
+        "address-type-from": {
+          "type": "string",
+          "description": "Тип адреса отправителя",
+          "enum": ["DEFAULT", "PO_BOX", "UNIT", "UNIT_SOUTH", "FIELD_POST"]
+        },
+        "address-type-to": {
+          "type": "string",
+          "description": "Тип адреса получателя",
+          "enum": ["DEFAULT", "PO_BOX", "UNIT", "UNIT_SOUTH", "FIELD_POST"]
+        },
+        "area-from": {
+          "type": "string",
+          "description": "Район отправителя"
+        },
+        "area-to": {
+          "type": "string",
+          "description": "Район"
+        },
+        "avia-rate": {
+          "type": "integer",
+          "description": "Авиа-сбор без НДС (для совместимости)"
+        },
+        "avia-rate-with-vat": {
+          "type": "integer",
+          "description": "Авиа-сбор с НДС"
+        },
+        "avia-rate-wo-vat": {
+          "type": "integer",
+          "description": "Авиа-сбор без НДС"
+        },
+        "barcode": {
+          "type": "string",
+          "description": "ШПИ"
+        },
+        "bk-hash": {
+          "type": "integer",
+          "description": "Хэш-код"
+        },
+        "branch-name": {
+          "type": "string",
+          "description": "Идентификатор подразделения"
+        },
+        "building-from": {
+          "type": "string",
+          "description": "Часть здания: Строение отправителя"
+        },
+        "building-to": {
+          "type": "string",
+          "description": "Часть здания: Строение"
+        },
+        "comment": {
+          "type": "string",
+          "description": "Комментарий к заказу"
+        },
+        "completeness-checking": {
+          "type": "boolean",
+          "description": "Признак услуги проверки комплектности"
+        },
+        "completeness-checking-rate-with-vat": {
+          "type": "integer",
+          "description": "Надбавка за \"Проверку комплектности\" с НДС"
+        },
+        "completeness-checking-rate-wo-vat": {
+          "type": "integer",
+          "description": "Надбавка за \"Проверку комплектности\" без НДС"
+        },
+        "compulsory-payment": {
+          "type": "integer",
+          "description": "К оплате с получателя (копейки)"
+        },
+        "contents-checking-rate-with-vat": {
+          "type": "integer",
+          "description": "Надбавка за \"Проверку вложений\" с НДС"
+        },
+        "contents-checking-rate-wo-vat": {
+          "type": "integer",
+          "description": "Надбавка за \"Проверку вложений\" без НДС"
+        },
+        "corpus-from": {
+          "type": "string",
+          "description": "Часть здания: Корпус отправителя"
+        },
+        "corpus-to": {
+          "type": "string",
+          "description": "Часть здания: Корпус"
+        },
+        "customs-declaration": {
+          "type": "object",
+          "description": "Таможенная декларация",
+          "properties": {
+            "certificate-number": {
+              "type": "string",
+              "description": "Сертификаты, сопровождающие отправление"
+            },
+            "comments": {
+              "type": "string",
+              "description": "Комментарии"
+            },
+            "currency": {
+              "type": "string",
+              "description": "Код валюты"
+            },
+            "customs-code": {
+              "type": "string",
+              "description": "Код таможенного органа"
+            },
+            "customs-comments": {
+              "type": "string",
+              "description": "Комментарии таможенного органа"
+            },
+            "customs-decision": {
+              "type": "string",
+              "description": "Решение таможенного органа",
+              "enum": [
+                "REJECTION",
+                "RELEASE_WO_CUSTOMS_DUTY",
+                "CUSTOMS_DUTY_REQUIRED",
+                "CUSTOMS_CONTROL_REQUIRED",
+                "RESERVE",
+                "RELEASE_SUSPENDED",
+                "RELEASE_PERIOD_PROLONGED",
+                "RELEASE_CUSTOMS_DUTY_PAID",
+                "AUTO_RELEASE_RETURN_GOODS",
+                "RELEASE_RETURN_GOODS",
+                "REJECTION_AUTO_RELEASE",
+                "DEPARTURE_ALLOWED",
+                "DEPARTURE_DENIED"
+              ]
+            },
+            "customs-entries": {
+              "type": "array",
+              "description": "Список вложений",
+              "items": {
+                "type": "object",
+                "required": ["amount", "description", "entry-number", "tnved-code"],
+                "properties": {
+                  "amount": {
+                    "type": "integer",
+                    "description": "Количество"
+                  },
+                  "country-code": {
+                    "type": "integer",
+                    "description": "Код страны происхождения"
+                  },
+                  "description": {
+                    "type": "string",
+                    "description": "Наименование товара"
+                  },
+                  "entry-number": {
+                    "type": "integer",
+                    "description": "Порядковый номер"
+                  },
+                  "tnved-code": {
+                    "type": "string",
+                    "description": "Код ТНВЭД"
+                  },
+                  "trademark": {
+                    "type": "string",
+                    "description": "Торговая марка"
+                  },
+                  "value": {
+                    "type": "integer",
+                    "description": "Цена за единицу товара в копейках (вкл. НДС)"
+                  },
+                  "weight": {
+                    "type": "integer",
+                    "description": "Вес товара (в граммах)"
+                  }
+                }
+              }
+            },
+            "decision-date": {
+              "type": "string",
+              "description": "Дата решения таможенного органа"
+            },
+            "decision-description": {
+              "type": "string",
+              "description": "Описание решения таможенного органа"
+            },
+            "entries-type": {
+              "type": "string",
+              "description": "Категория вложения",
+              "enum": ["GIFT", "DOCUMENT", "SALE_OF_GOODS", "COMMERCIAL_SAMPLE", "OTHER"]
+            },
+            "fts-error": {
+              "type": "string",
+              "description": "Ошибка декларирования"
+            },
+            "invoice-number": {
+              "type": "string",
+              "description": "Счет (номер счета-фактуры)"
+            },
+            "ioss-code": {
+              "type": "string",
+              "description": "Регистрационный код продавца"
+            },
+            "license-number": {
+              "type": "string",
+              "description": "Лицензии, сопровождающие отправление"
+            },
+            "recom-description": {
+              "type": "string",
+              "description": "Описание рекомендации таможенного органа"
+            },
+            "registration-date": {
+              "type": "string",
+              "description": "Дата регистрации документа таможенным органом"
+            },
+            "status": {
+              "type": "string",
+              "description": "Статус декларации в процессе электронного декларирования",
+              "enum": ["NEW", "TRANSIT", "IN_PROGRESS", "DONE", "REJECTED", "CANCELED", "ILLEGAL_DATA", "FTS_ERROR"]
+            },
+            "with-certificate": {
+              "type": "boolean",
+              "description": "Приложенные документы: сертификат"
+            },
+            "with-invoice": {
+              "type": "boolean",
+              "description": "Приложенные документы: счет-фактура"
+            },
+            "with-license": {
+              "type": "boolean",
+              "description": "Приложенные документы: лицензия"
+            }
+          },
+          "required": ["currency", "entries-type"]
+        },
+        "declaration-status": {
+          "type": "string",
+          "description": "Результат электронного декларирования",
+          "enum": ["NEW", "TRANSIT", "IN_PROGRESS", "DONE", "REJECTED", "CANCELED", "ILLEGAL_DATA", "FTS_ERROR"]
+        },
+        "delivery-time": {
+          "type": "object",
+          "description": "Время доставки",
+          "properties": {
+            "max-days": {
+              "type": "integer",
+              "description": "Максимальное время доставки (дни)"
+            },
+            "min-days": {
+              "type": "integer",
+              "description": "Минимальное время доставки (дни)"
+            }
+          },
+          "required": ["max-days"]
+        },
+        "delivery-with-cod": {
+          "type": "boolean",
+          "description": "Признак оплаты при получении"
+        },
+        "dimension": {
+          "type": "object",
+          "description": "Линейные размеры",
+          "properties": {
+            "height": {
+              "type": "integer",
+              "description": "Линейная высота (сантиметры)"
+            },
+            "length": {
+              "type": "integer",
+              "description": "Линейная длина (сантиметры)"
+            },
+            "width": {
+              "type": "integer",
+              "description": "Линейная ширина (сантиметры)"
+            }
+          }
+        },
+        "dimension-type": {
+          "type": "string",
+          "description": "Типоразмер",
+          "enum": ["S", "M", "L", "XL", "OVERSIZE"]
+        },
+        "easy-return-rate-with-vat": {
+          "type": "integer",
+          "description": "Сбор за \"Лёгкий возврат\" с НДС"
+        },
+        "easy-return-rate-wo-vat": {
+          "type": "integer",
+          "description": "Сбор за \"Лёгкий возврат\" без НДС"
+        },
+        "ecom-data": {
+          "type": "object",
+          "description": "Данные ЕКОМ",
+          "properties": {
+            "delivery-point-index": {
+              "type": "string",
+              "description": "Идентификатор пункта выдачи"
+            },
+            "delivery-point-type": {
+              "type": "string",
+              "description": "Тип пункта выдачи",
+              "enum": ["DELIVERY_POINT", "PARTNER", "POST_OFFICE", "POSTOMAT"]
+            },
+            "identity-methods": {
+              "type": "array",
+              "description": "Методы идентификации",
+              "items": {
+                "type": "string",
+                "enum": ["WITHOUT_IDENTIFICATION", "BY_PASSPORT", "BY_PIN_CODE", "BY_SMS"]
+              }
+            },
+            "services": {
+              "type": "array",
+              "description": "Коды видов сервиса",
+              "items": {
+                "type": "string",
+                "enum": ["WITHOUT_SERVICE", "WITH_FITTING", "WITH_INSPECTION", "WITH_PARTIAL_REDEMPTION"]
+              }
+            }
+          }
+        },
+        "envelope-type": {
+          "type": "string",
+          "description": "Тип конверта - ГОСТ Р 51506-99",
+          "enum": ["C4", "C5", "C6", "DL"]
+        },
+        "fiscal-data": {
+          "type": "object",
+          "description": "Фискальные данные",
+          "properties": {
+            "customer-email": {
+              "type": "string",
+              "description": "Адрес электронной почты плательщика"
+            },
+            "customer-inn": {
+              "type": "string",
+              "description": "ИНН юридического лица покупателя"
+            },
+            "customer-name": {
+              "type": "string",
+              "description": "Наименование юридического лица покупателя"
+            },
+            "customer-phone": {
+              "type": "integer",
+              "description": "Телефон плательщика"
+            },
+            "fiscal-payments": {
+              "type": "array",
+              "description": "Средства, использованные при оплате",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "payment-amount": {
+                    "type": "integer",
+                    "description": "Сумма оплаты платежным средством,(копейки)"
+                  },
+                  "payment-kind": {
+                    "type": "integer",
+                    "description": "Вид платежного средства"
+                  },
+                  "payment-type": {
+                    "type": "integer",
+                    "description": "Тип платежного средства"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "fragile-rate-with-vat": {
+          "type": "integer",
+          "description": "Надбавка за отметку \"Осторожно/Хрупкое/Терморежим\""
+        },
+        "fragile-rate-wo-vat": {
+          "type": "integer",
+          "description": "Надбавка за отметку \"Осторожно/Хрупкое/Терморежим\" без НДС"
+        },
+        "functionality-checking-rate-with-vat": {
+          "type": "integer",
+          "description": "Надбавка за \"Проверку вложений с проверкой работоспособности\" с НДС"
+        },
+        "functionality-checking-rate-wo-vat": {
+          "type": "integer",
+          "description": "Надбавка за \"Проверку вложений с проверкой работоспособности\" без НДС"
+        },
+        "given-name": {
+          "type": "string",
+          "description": "Имя получателя"
+        },
+        "goods": {
+          "type": "object",
+          "description": "Товарное вложение РПО",
+          "properties": {
+            "items": {
+              "type": "array",
+              "description": "Список вложений",
+              "items": {
+                "type": "object",
+                "required": ["description", "id", "quantity"],
+                "properties": {
+                  "category-feature": {
+                    "type": "string",
+                    "description": "Категория товара"
+                  },
+                  "code": {
+                    "type": "string",
+                    "description": "Код (маркировка) товара"
+                  },
+                  "country-code": {
+                    "type": "integer",
+                    "description": "Код страны происхождения"
+                  },
+                  "customs-declaration-number": {
+                    "type": "string",
+                    "description": "Номер таможенной декларации"
+                  },
+                  "description": {
+                    "type": "string",
+                    "description": "Наименование товара"
+                  },
+                  "excise": {
+                    "type": "integer",
+                    "description": "Акциз (копейки)"
+                  },
+                  "good-id": {
+                    "type": "string",
+                    "description": "внутренний идентификатор товара у поставщика"
+                  },
+                  "goods-type": {
+                    "type": "string",
+                    "description": "Признак товар или услуга",
+                    "enum": ["GOODS", "SERVICE"]
+                  },
+                  "id": {
+                    "type": "integer",
+                    "description": "Номер товара в списке вложений"
+                  },
+                  "insr-value": {
+                    "type": "integer",
+                    "description": "Объявленная ценность (копейки)"
+                  },
+                  "item-number": {
+                    "type": "string",
+                    "description": "Номенклатура (артикул) товара"
+                  },
+                  "lineattr": {
+                    "type": "integer",
+                    "description": "Признак предмета расчета"
+                  },
+                  "payattr": {
+                    "type": "integer",
+                    "description": "Признак способа расчета"
+                  },
+                  "quantity": {
+                    "type": "number",
+                    "description": "Количество товара"
+                  },
+                  "returned": {
+                    "type": "boolean",
+                    "description": "Статус возврата, вложения(ЕКОМ)"
+                  },
+                  "service-type": {
+                    "type": "integer",
+                    "description": "Вид сервиса для товара: 1 - без вскрытия (по умолчанию), 2 - с осмотром вложения, 3 - с примеркой",
+                    "enum": [1, 2, 3]
+                  },
+                  "supplier-inn": {
+                    "type": "string",
+                    "description": "ИНН поставщика товара"
+                  },
+                  "supplier-name": {
+                    "type": "string",
+                    "description": "Наименование поставщика товара"
+                  },
+                  "supplier-phone": {
+                    "type": "string",
+                    "description": "Телефон поставщика товара"
+                  },
+                  "value": {
+                    "type": "integer",
+                    "description": "Цена за единицу товара в копейках (вкл. НДС)"
+                  },
+                  "vat-rate": {
+                    "type": "integer",
+                    "description": "Ставка НДС: Без НДС(-1), 0, 10, 110, 20, 120",
+                    "enum": [-1, 0, 10, 110, 20, 120]
+                  },
+                  "weight": {
+                    "type": "integer",
+                    "description": "Вес товара (в граммах)"
+                  }
+                }
+              }
+            }
+          },
+          "required": ["items"]
+        },
+        "ground-rate": {
+          "type": "integer",
+          "description": "Сбор за доставку наземно без НДС (для совместимости)"
+        },
+        "ground-rate-with-vat": {
+          "type": "integer",
+          "description": "Сбор за доставку наземно с НДС"
+        },
+        "ground-rate-wo-vat": {
+          "type": "integer",
+          "description": "Сбор за доставку наземно без НДС"
+        },
+        "group-name": {
+          "type": "string",
+          "description": "Наименование группы (для Многоместных отправлений)"
+        },
+        "hotel-from": {
+          "type": "string",
+          "description": "Название гостиницы отправителя"
+        },
+        "hotel-to": {
+          "type": "string",
+          "description": "Название гостиницы"
+        },
+        "house-from": {
+          "type": "string",
+          "description": "Часть адреса: Номер здания отправителя"
+        },
+        "house-to": {
+          "type": "string",
+          "description": "Часть адреса: Номер здания"
+        },
+        "id": {
+          "type": "integer",
+          "description": "Внутренний идентификатор отправления"
+        },
+        "in-mmo": {
+          "type": "boolean",
+          "description": "Отправление в составе ММО"
+        },
+        "index-from": {
+          "type": "string",
+          "description": "Почтовый индекс отправителя"
+        },
+        "index-to": {
+          "type": "integer",
+          "description": "Почтовый индекс"
+        },
+        "inner-num": {
+          "type": "string",
+          "description": "Дополнительный идентификатор отправления"
+        },
+        "insr-rate": {
+          "type": "integer",
+          "description": "Плата за ОЦ без НДС (для совместимости)"
+        },
+        "insr-rate-with-vat": {
+          "type": "integer",
+          "description": "Плата за ОЦ с НДС"
+        },
+        "insr-rate-wo-vat": {
+          "type": "integer",
+          "description": "Плата за ОЦ без НДС"
+        },
+        "insr-value": {
+          "type": "integer",
+          "description": "Объявленная ценность (копейки)"
+        },
+        "inventory-rate-with-vat": {
+          "type": "integer",
+          "description": "Надбавка за \"Опись вложения\" с НДС"
+        },
+        "inventory-rate-wo-vat": {
+          "type": "integer",
+          "description": "Надбавка за \"Опись вложения\" без НДС"
+        },
+        "is-deleted": {
+          "type": "boolean",
+          "description": "Заказ удален?"
+        },
+        "letter-from": {
+          "type": "string",
+          "description": "Часть здания: Литера отправителя"
+        },
+        "letter-to": {
+          "type": "string",
+          "description": "Часть здания: Литера"
+        },
+        "linked-barcode": {
+          "type": "string",
+          "description": "ШПИ связанного отправления"
+        },
+        "location-from": {
+          "type": "string",
+          "description": "Микрорайон отправителя"
+        },
+        "location-to": {
+          "type": "string",
+          "description": "Микрорайон"
+        },
+        "mail-category": {
+          "type": "string",
+          "description": "Категория РПО",
+          "enum": ["SIMPLE", "ORDERED", "ORDINARY", "WITH_DECLARED_VALUE", "WITH_DECLARED_VALUE_AND_CASH_ON_DELIVERY", "COMBINED"]
+        },
+        "mail-direct": {
+          "type": "integer",
+          "description": "Код страны"
+        },
+        "mail-rank": {
+          "type": "string",
+          "description": "Код разряда почтового отправления",
+          "enum": ["WO_RANK", "GOVERNMENTAL", "MILITARY"]
+        },
+        "mail-type": {
+          "type": "string",
+          "description": "Вид РПО",
+          "enum": ["UNDEFINED", "POSTAL_PARCEL", "ONLINE_PARCEL", "ONLINE_COURIER", "EMS", "EMS_OPTIMAL", "LETTER", "BANDEROL", "ECOM", "POSTOMAT", "COURIER_ONLINE"]
+        },
+        "mass": {
+          "type": "integer",
+          "description": "Вес РПО (в граммах)"
+        },
+        "mass-rate": {
+          "type": "integer",
+          "description": "Почтовый сбор без НДС (для совместимости)"
+        },
+        "mass-rate-with-vat": {
+          "type": "integer",
+          "description": "Почтовый сбор с НДС"
+        },
+        "mass-rate-wo-vat": {
+          "type": "integer",
+          "description": "Почтовый сбор без НДС"
+        },
+        "middle-name": {
+          "type": "string",
+          "description": "Отчество получателя"
+        },
+        "notice-payment-method": {
+          "type": "string",
+          "description": "Способ оплаты",
+          "enum": ["CASHLESS", "FRANKING", "STAMP", "TO_FRANKING"]
+        },
+        "notice-rate-with-vat": {
+          "type": "integer",
+          "description": "Надбавка за уведомление о вручении с НДС"
+        },
+        "notice-rate-wo-vat": {
+          "type": "integer",
+          "description": "Надбавка за уведомление о вручении без НДС"
+        },
+        "num-address-type-from": {
+          "type": "string",
+          "description": "Номер для а/я, войсковая часть, войсковая часть ЮЯ, полевая почта отправителя"
+        },
+        "num-address-type-to": {
+          "type": "string",
+          "description": "Номер для а/я, войсковая часть, войсковая часть ЮЯ, полевая почта"
+        },
+        "office-from": {
+          "type": "string",
+          "description": "Часть здания: Офис отправителя"
+        },
+        "office-to": {
+          "type": "string",
+          "description": "Часть здания: Офис"
+        },
+        "order-num": {
+          "type": "string",
+          "description": "Номер заказа. Внешний идентификатор заказа, который формируется отправителем"
+        },
+        "oversize-rate-with-vat": {
+          "type": "integer",
+          "description": "Надбавка за негабарит при весе более 10кг с НДС"
+        },
+        "oversize-rate-wo-vat": {
+          "type": "integer",
+          "description": "Надбавка за негабарит при весе более 10кг без НДС"
+        },
+        "partial-redemption-rate-with-vat": {
+          "type": "integer",
+          "description": "Надбавка за \"Частичный выкуп\" с НДС"
+        },
+        "partial-redemption-rate-wo-vat": {
+          "type": "integer",
+          "description": "Надбавка за \"Частичный выкуп\" без НДС"
+        },
+        "payment": {
+          "type": "integer",
+          "description": "Сумма наложенного платежа (копейки)"
+        },
+        "payment-method": {
+          "type": "string",
+          "description": "Способ оплаты",
+          "enum": ["CASHLESS", "FRANKING", "STAMP", "TO_FRANKING"]
+        },
+        "place-from": {
+          "type": "string",
+          "description": "Населенный пункт отправителя"
+        },
+        "place-to": {
+          "type": "string",
+          "description": "Населенный пункт"
+        },
+        "postmarks": {
+          "type": "array",
+          "description": "Коды отметок внутренних и международных отправлений",
+          "items": {
+            "type": "string",
+            "enum": ["WITHOUT_MARK", "FRAGILE", "CARE", "THERMAL_MODE"]
+          }
+        },
+        "postoffice-code": {
+          "type": "string",
+          "description": "Индекс места приема"
+        },
+        "pre-postal-preparation": {
+          "type": "boolean",
+          "description": "Отметка 'Предпостовая подготовка'"
+        },
+        "pre-postal-preparation-rate-with-vat": {
+          "type": "integer",
+          "description": "Надбавка за \"Предпочтовая подготовка\" с НДС"
+        },
+        "pre-postal-preparation-rate-wo-vat": {
+          "type": "integer",
+          "description": "Надбавка за \"Предпочтовая подготовка\" без НДС"
+        },
+        "prepaid-amount": {
+          "type": "integer",
+          "description": "Сумма частичной предоплаты"
+        },
+        "raw-address": {
+          "type": "string",
+          "description": "Необработанный адрес получателя"
+        },
+        "recipient-name": {
+          "type": "string",
+          "description": "Наименование получателя одной строкой (ФИО, наименование организации)"
+        },
+        "region-from": {
+          "type": "string",
+          "description": "Область, регион отправителя"
+        },
+        "region-to": {
+          "type": "string",
+          "description": "Область, регион"
+        },
+        "room-from": {
+          "type": "string",
+          "description": "Часть здания: Номер помещения отправителя"
+        },
+        "room-to": {
+          "type": "string",
+          "description": "Часть здания: Номер помещения"
+        },
+        "sender-comment": {
+          "type": "string",
+          "description": "Комментария отправителя к ЭУВ"
+        },
+        "sender-name": {
+          "type": "string",
+          "description": "Наименование отправителя одной строкой (ФИО, наименование организации)"
+        },
+        "shelf-life-days": {
+          "type": "integer",
+          "description": "Срок хранения отправления от 15 до 60 дней",
+          "minimum": 15,
+          "maximum": 60
+        },
+        "slash-from": {
+          "type": "string",
+          "description": "Часть здания: Дробь отправителя"
+        },
+        "slash-to": {
+          "type": "string",
+          "description": "Часть здания: Дробь"
+        },
+        "sms-notice-recipient": {
+          "type": "integer",
+          "description": "Признак услуги SMS уведомления"
+        },
+        "sms-notice-recipient-rate-with-vat": {
+          "type": "integer",
+          "description": "Надбавка за \"Пакет смс получателю\" с НДС"
+        },
+        "sms-notice-recipient-rate-wo-vat": {
+          "type": "integer",
+          "description": "Надбавка за \"Пакет смс получателю\" без НДС"
+        },
+        "str-index-to": {
+          "type": "string",
+          "description": "Почтовый индекс (буквенно-цифровой)"
+        },
+        "street-from": {
+          "type": "string",
+          "description": "Часть адреса: Улица отправителя"
+        },
+        "street-to": {
+          "type": "string",
+          "description": "Часть адреса: Улица"
+        },
+        "surname": {
+          "type": "string",
+          "description": "Фамилия получателя"
+        },
+        "tel-address": {
+          "type": "integer",
+          "description": "Телефон получателя (может быть обязательным для некоторых типов отправлений)"
+        },
+        "tel-address-from": {
+          "type": "integer",
+          "description": "Телефон отправителя"
+        },
+        "tender": {
+          "type": "boolean",
+          "description": "Доступно только для отправлений «ЕКОМ Маркетплейс». Отметка указывает на перевозку грузоотправлений ЕКОМ Маркетплейс, принятых в рамках заключенных тендерных договоров"
+        },
+        "total-rate-wo-vat": {
+          "type": "integer",
+          "description": "Плата всего без НДС (коп)"
+        },
+        "total-vat": {
+          "type": "integer",
+          "description": "Всего НДС (коп)"
+        },
+        "transport-mode": {
+          "type": "string",
+          "description": "Возможный режим транспортировки (только для типа отправлений EMS Тендер)",
+          "enum": ["STANDARD", "EXPRESS"]
+        },
+        "transport-type": {
+          "type": "string",
+          "description": "Вид транспортировки",
+          "enum": ["SURFACE", "AIR", "COMBINED", "STANDARD"]
+        },
+        "version": {
+          "type": "integer",
+          "description": "Версия заказа"
+        },
+        "vladenie-from": {
+          "type": "string",
+          "description": "Часть здания: Владение отправителя"
+        },
+        "vladenie-to": {
+          "type": "string",
+          "description": "Часть здания: Владение"
+        },
+        "vsd-rate-with-vat": {
+          "type": "integer",
+          "description": "Надбавка за \"Возврат сопроводительных документов\" с НДС"
+        },
+        "vsd-rate-wo-vat": {
+          "type": "integer",
+          "description": "Надбавка за \"Возврат сопроводительных документов\" без НДС"
+        },
+        "with-fitting-rate-with-vat": {
+          "type": "integer",
+          "description": "Надбавка за \"Проверку вложений с примеркой\" с НДС"
+        },
+        "with-fitting-rate-wo-vat": {
+          "type": "integer",
+          "description": "Надбавка за \"Проверку вложений с примеркой\" без НДС"
+        },
+        "seller-id": {
+          "type": "string",
+          "description": "Идентификатор отправителя на торговой площадке"
+        },
+        "payment-details": {
+          "type": "object",
+          "description": "Реквизиты получателя наложенного платежа",
+          "properties": {
+            "recipient-surname": {
+              "type": "string",
+              "description": "Фамилия получателя наложенного платежа"
+            },
+            "recipient-firstname": {
+              "type": "string",
+              "description": "Имя получателя наложенного платежа"
+            },
+            "recipient-middlename": {
+              "type": "string",
+              "description": "Отчество получателя наложенного платежа"
+            },
+            "bank-name": {
+              "type": "string",
+              "description": "Наименование банка получателя наложенного платежа"
+            },
+            "bank-bik": {
+              "type": "string",
+              "description": "БИК банка получателя наложенного платежа"
+            },
+            "bank-corr-account": {
+              "type": "string",
+              "description": "Корреспондентский счет получателя наложенного платежа"
+            },
+            "bank-account": {
+              "type": "string",
+              "description": "Счет получателя наложенного платежа"
+            },
+            "is-cash": {
+              "type": "string",
+              "description": "Признак получения наложенного платежа наличными"
+            }
+          }
+        }
+      },
+      "required": [
+        "address-type-from",
+        "address-type-to",
+        "house-from",
+        "house-to",
+        "id",
+        "mail-rank",
+        "payment-method",
+        "place-from",
+        "place-to",
+        "recipient-name",
+        "region-from",
+        "region-to",
+        "street-from",
+        "street-to",
+        "total-rate-wo-vat",
+        "total-vat",
+        "transport-type",
+        "version"
+      ]
+    }
+  }
+}

@@ -1,0 +1,32 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://api.pochta.ru/schemas/postoffice-by-address-response.json",
+  "title": "Схема ответа API Почты России - Поиск ОПС по адресу",
+  "description": "JSON Schema для ответа метода поиска почтовых отделений по адресу",
+  "definitions": {
+    "response": {
+      "type": "object",
+      "description": "Ответ API с результатами поиска ОПС",
+      "required": [
+        "is-matched",
+        "postoffices"
+      ],
+      "properties": {
+        "is-matched": {
+          "type": "boolean",
+          "description": "Флаг, говорящий, является ли переданный в параметре address адрес точным адресом ОПС (случай, когда переданный адрес и есть адрес ОПС). Данный флаг определяется только для первого ОПС в списке, т.е. он говорит о том, является ли переданный адрес точным адресом самого релевантного найденного ОПС."
+        },
+        "postoffices": {
+          "type": "array",
+          "description": "Список почтовых индексов найденных ОПС отсортированный по релевантности",
+          "items": {
+            "type": "string",
+            "description": "Почтовый индекс ОПС"
+          }
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "$ref": "#/definitions/response"
+}
