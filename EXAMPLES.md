@@ -43,20 +43,31 @@ echo $createdOrder->id;       // API-assigned ID
 echo $createdOrder->barcode;  // API-assigned barcode (ШПИ)
 ```
 
-### Direct Constructor (for minimal orders)
+### Notes on Validation
+
+**Builder validates required fields:**
+- `orderNum` - order number
+- `mailType` - mail type (enum)
+- `mailCategory` - mail category (enum)
+- `mass` - weight in grams
+- `recipientName` OR both `surname` + `givenName`
+- `addressTo` - destination address
+
+If any required field is missing, `build()` throws `InvalidArgumentException`.
+
+### Direct Constructor (bypasses validation)
 
 ```php
 use SergeR\RussianPostSDK\Domain\Order;
 use SergeR\RussianPostSDK\Enums\{MailType, MailCategory};
 
+// Direct constructor - no validation, for API responses or advanced use
 $order = new Order(
     orderNum: 'ORDER-12345',
     mailType: MailType::ONLINE_PARCEL,
     mailCategory: MailCategory::SIMPLE,
     mass: 1000,
 );
-
-$createdOrder = $client->orders()->create($order);
 ```
 
 ## Finding Orders

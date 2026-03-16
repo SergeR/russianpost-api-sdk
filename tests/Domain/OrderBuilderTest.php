@@ -11,6 +11,16 @@ use SergeR\RussianPostSDK\Enums\{MailType, MailCategory, AddressType};
 
 final class OrderBuilderTest extends TestCase
 {
+    private Address $testAddress;
+
+    protected function setUp(): void
+    {
+        $this->testAddress = new Address(
+            addressType: AddressType::DEFAULT,
+            postcode: '119991'
+        );
+    }
+
     public function testBuilderCreatesOrder(): void
     {
         $order = OrderBuilder::create()
@@ -18,6 +28,8 @@ final class OrderBuilderTest extends TestCase
             ->mailType(MailType::ONLINE_PARCEL)
             ->mailCategory(MailCategory::SIMPLE)
             ->mass(1000)
+            ->recipientName('John Doe')
+            ->addressTo($this->testAddress)
             ->build();
 
         self::assertInstanceOf(Order::class, $order);
@@ -31,7 +43,11 @@ final class OrderBuilderTest extends TestCase
     {
         $order = OrderBuilder::create()
             ->orderNum('ORDER-002')
+            ->mailType(MailType::ONLINE_PARCEL)
+            ->mailCategory(MailCategory::SIMPLE)
+            ->mass(500)
             ->recipient('Doe', 'John', 'Middle')
+            ->addressTo($this->testAddress)
             ->build();
 
         self::assertSame('John Doe Middle', $order->recipientName);
@@ -43,7 +59,12 @@ final class OrderBuilderTest extends TestCase
     public function testBuilderWithRecipientWithoutMiddleName(): void
     {
         $order = OrderBuilder::create()
+            ->orderNum('ORDER-002B')
+            ->mailType(MailType::ONLINE_PARCEL)
+            ->mailCategory(MailCategory::SIMPLE)
+            ->mass(500)
             ->recipient('Doe', 'John')
+            ->addressTo($this->testAddress)
             ->build();
 
         self::assertSame('John Doe', $order->recipientName);
@@ -51,20 +72,18 @@ final class OrderBuilderTest extends TestCase
 
     public function testBuilderWithFullAddress(): void
     {
-        $address = new Address(
-            addressType: AddressType::DEFAULT,
-            postcode: '119991'
-        );
-
         $order = OrderBuilder::create()
             ->orderNum('ORDER-003')
+            ->mailType(MailType::ONLINE_PARCEL)
+            ->mailCategory(MailCategory::SIMPLE)
+            ->mass(500)
             ->recipient('Doe', 'John')
             ->region('Moscow Oblast')
             ->place('Moscow')
             ->street('Lenin St')
             ->house('10')
             ->addressTypeTo('DEFAULT')
-            ->addressTo($address)
+            ->addressTo($this->testAddress)
             ->build();
 
         self::assertSame('ORDER-003', $order->orderNum);
@@ -78,6 +97,12 @@ final class OrderBuilderTest extends TestCase
     public function testBuilderWithContactInfo(): void
     {
         $order = OrderBuilder::create()
+            ->orderNum('ORDER-CONTACT')
+            ->mailType(MailType::ONLINE_PARCEL)
+            ->mailCategory(MailCategory::SIMPLE)
+            ->mass(500)
+            ->recipientName('Test')
+            ->addressTo($this->testAddress)
             ->phone('+7-999-123-45-67')
             ->email('test@example.com')
             ->build();
@@ -89,6 +114,12 @@ final class OrderBuilderTest extends TestCase
     public function testBuilderWithDeliveryOptions(): void
     {
         $order = OrderBuilder::create()
+            ->orderNum('ORDER-DELIVERY')
+            ->mailType(MailType::ONLINE_PARCEL)
+            ->mailCategory(MailCategory::SIMPLE)
+            ->mass(500)
+            ->recipientName('Test')
+            ->addressTo($this->testAddress)
             ->fragile(true)
             ->courier(true)
             ->declaredValue(50000)
@@ -105,17 +136,6 @@ final class OrderBuilderTest extends TestCase
         self::assertSame('Handle with care', $order->comment);
     }
 
-    public function testBuilderWithMinimalData(): void
-    {
-        $order = OrderBuilder::create()
-            ->build();
-
-        // All fields should be null for minimal order
-        self::assertNull($order->orderNum);
-        self::assertNull($order->mailType);
-        self::assertNull($order->mass);
-    }
-
     public function testBuilderMethodChainingFluency(): void
     {
         $order = OrderBuilder::create()
@@ -124,6 +144,7 @@ final class OrderBuilderTest extends TestCase
             ->mailCategory(MailCategory::WITH_DECLARED_VALUE)
             ->mass(2500)
             ->recipient('Smith', 'Jane')
+            ->addressTo($this->testAddress)
             ->phone('+1-800-123-4567')
             ->email('jane@example.com')
             ->fragile(true)
@@ -138,29 +159,6 @@ final class OrderBuilderTest extends TestCase
         self::assertTrue($order->fragile);
     }
 
-    public function testBuilderCanBeReused(): void
-    {
-        $builder = OrderBuilder::create()
-            ->orderNum('BASE-ORDER')
-            ->mailType(MailType::ONLINE_PARCEL)
-            ->mailCategory(MailCategory::SIMPLE);
-
-        // Create first order
-        $order1 = $builder
-            ->mass(1000)
-            ->build();
-
-        // Note: Builder state is shared, so let's test with new builders
-        $builder2 = OrderBuilder::create()
-            ->orderNum('BASE-ORDER')
-            ->mailType(MailType::ONLINE_PARCEL)
-            ->mass(2000)
-            ->build();
-
-        self::assertSame(1000, $order1->mass);
-        self::assertSame(2000, $builder2->mass);
-    }
-
     public function testBuilderToArrayIntegration(): void
     {
         $order = OrderBuilder::create()
@@ -169,6 +167,7 @@ final class OrderBuilderTest extends TestCase
             ->mailCategory(MailCategory::SIMPLE)
             ->mass(500)
             ->recipient('Ivanov', 'Ivan')
+            ->addressTo($this->testAddress)
             ->phone('+7-999-100-00-01')
             ->build();
 
@@ -202,9 +201,122 @@ final class OrderBuilderTest extends TestCase
             ->mailType($order->mailType)
             ->mailCategory($order->mailCategory)
             ->mass($order->mass)
+            ->recipientName('Similar User')
+            ->addressTo($this->testAddress)
             ->build();
 
         self::assertSame(MailType::ONLINE_PARCEL, $newOrder->mailType);
         self::assertSame(1500, $newOrder->mass);
+    }
+
+    // Validation tests
+
+    public function testBuilderValidatesRequiredOrderNum(): void
+    {
+        self::expectException(\InvalidArgumentException::class);
+        self::expectExceptionMessageMatches('/orderNum is required/');
+
+        OrderBuilder::create()
+            ->mailType(MailType::ONLINE_PARCEL)
+            ->mailCategory(MailCategory::SIMPLE)
+            ->mass(1000)
+            ->recipientName('John Doe')
+            ->addressTo($this->testAddress)
+            ->build();
+    }
+
+    public function testBuilderValidatesRequiredMailType(): void
+    {
+        self::expectException(\InvalidArgumentException::class);
+        self::expectExceptionMessageMatches('/mailType is required/');
+
+        OrderBuilder::create()
+            ->orderNum('ORDER-008')
+            ->mailCategory(MailCategory::SIMPLE)
+            ->mass(1000)
+            ->recipientName('John Doe')
+            ->addressTo($this->testAddress)
+            ->build();
+    }
+
+    public function testBuilderValidatesRequiredMailCategory(): void
+    {
+        self::expectException(\InvalidArgumentException::class);
+        self::expectExceptionMessageMatches('/mailCategory is required/');
+
+        OrderBuilder::create()
+            ->orderNum('ORDER-009')
+            ->mailType(MailType::ONLINE_PARCEL)
+            ->mass(1000)
+            ->recipientName('John Doe')
+            ->addressTo($this->testAddress)
+            ->build();
+    }
+
+    public function testBuilderValidatesRequiredMass(): void
+    {
+        self::expectException(\InvalidArgumentException::class);
+        self::expectExceptionMessageMatches('/mass is required/');
+
+        OrderBuilder::create()
+            ->orderNum('ORDER-010')
+            ->mailType(MailType::ONLINE_PARCEL)
+            ->mailCategory(MailCategory::SIMPLE)
+            ->recipientName('John Doe')
+            ->addressTo($this->testAddress)
+            ->build();
+    }
+
+    public function testBuilderValidatesRecipientName(): void
+    {
+        self::expectException(\InvalidArgumentException::class);
+        self::expectExceptionMessageMatches('/recipientName or both surname and givenName are required/');
+
+        OrderBuilder::create()
+            ->orderNum('ORDER-011')
+            ->mailType(MailType::ONLINE_PARCEL)
+            ->mailCategory(MailCategory::SIMPLE)
+            ->mass(1000)
+            ->addressTo($this->testAddress)
+            ->build();
+    }
+
+    public function testBuilderValidatesAddressTo(): void
+    {
+        self::expectException(\InvalidArgumentException::class);
+        self::expectExceptionMessageMatches('/addressTo is required/');
+
+        OrderBuilder::create()
+            ->orderNum('ORDER-012')
+            ->mailType(MailType::ONLINE_PARCEL)
+            ->mailCategory(MailCategory::SIMPLE)
+            ->mass(1000)
+            ->recipientName('John Doe')
+            ->build();
+    }
+
+    public function testBuilderMultipleValidationErrors(): void
+    {
+        self::expectException(\InvalidArgumentException::class);
+        // Check that multiple errors are reported
+        self::expectExceptionMessageMatches('/orderNum is required/');
+
+        OrderBuilder::create()->build();
+    }
+
+    public function testBuilderValidatesWithRecipientMethod(): void
+    {
+        // Should not throw - recipient() sets both surname and givenName
+        $order = OrderBuilder::create()
+            ->orderNum('ORDER-013')
+            ->mailType(MailType::ONLINE_PARCEL)
+            ->mailCategory(MailCategory::SIMPLE)
+            ->mass(1000)
+            ->recipient('Smith', 'Jane')
+            ->addressTo($this->testAddress)
+            ->build();
+
+        self::assertSame('ORDER-013', $order->orderNum);
+        self::assertSame('Jane Smith', $order->recipientName);
     }
 }

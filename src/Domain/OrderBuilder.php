@@ -161,6 +161,41 @@ final class OrderBuilder
 
     private function __construct() {}
 
+    /**
+     * Validate required fields for Order creation.
+     *
+     * @throws \InvalidArgumentException
+     */
+    private function validate(): void
+    {
+        $errors = [];
+
+        if ($this->orderNum === null) {
+            $errors[] = 'orderNum is required';
+        }
+        if ($this->mailType === null) {
+            $errors[] = 'mailType is required';
+        }
+        if ($this->mailCategory === null) {
+            $errors[] = 'mailCategory is required';
+        }
+        if ($this->mass === null) {
+            $errors[] = 'mass is required (in grams)';
+        }
+        if ($this->recipientName === null && ($this->surname === null || $this->givenName === null)) {
+            $errors[] = 'recipientName or both surname and givenName are required';
+        }
+        if ($this->addressTo === null) {
+            $errors[] = 'addressTo is required';
+        }
+
+        if (!empty($errors)) {
+            throw new \InvalidArgumentException(
+                'Cannot build Order: ' . implode(', ', $errors)
+            );
+        }
+    }
+
     public static function create(): self
     {
         return new self();
@@ -373,8 +408,15 @@ final class OrderBuilder
         return $this;
     }
 
+    /**
+     * Build and validate the Order.
+     *
+     * @throws \InvalidArgumentException if required fields are missing
+     */
     public function build(): Order
     {
+        $this->validate();
+
         return new Order(
             id: $this->id,
             orderNum: $this->orderNum,
