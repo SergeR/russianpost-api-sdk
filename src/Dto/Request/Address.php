@@ -21,4 +21,21 @@ final readonly class Address
         public ?string $house = null,
         public ?string $room = null,
     ) {}
+
+    /**
+     * @param array<string,mixed> $data
+     */
+    public static function fromArray(array $data): self
+    {
+        return new self(
+            addressType: AddressType::tryFrom($data['address-type'] ?? 'DEFAULT') ?? AddressType::DEFAULT,
+            postcode: $data['postcode'] ?? '',
+            region: $data['region'] ?? null,
+            place: $data['place'] ?? null,
+            location: $data['location'] ?? null,
+            street: $data['street'] ?? null,
+            house: $data['house'] ?? null,
+            room: $data['room'] ?? null,
+        );
+    }
 }

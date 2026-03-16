@@ -15,4 +15,16 @@ final readonly class Dimension
         public int $length,   // millimeters
         public int $width,    // millimeters
     ) {}
+
+    /**
+     * @param array<string,mixed> $data
+     */
+    public static function fromArray(array $data): self
+    {
+        return new self(
+            height: (int) ($data['height'] ?? 0),
+            length: (int) ($data['length'] ?? 0),
+            width: (int) ($data['width'] ?? 0),
+        );
+    }
 }

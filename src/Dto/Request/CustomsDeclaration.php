@@ -20,4 +20,18 @@ final readonly class CustomsDeclaration
         public ?string $certificateNumber = null,
         public ?string $customsCode = null,
     ) {}
+
+    /**
+     * @param array<string,mixed> $data
+     */
+    public static function fromArray(array $data): self
+    {
+        return new self(
+            currency: $data['currency'] ?? 'RUB',
+            customsEntries: $data['customs-entries'] ?? $data['customsEntries'] ?? [],
+            entriesType: $data['entries-type'] ?? $data['entriesType'] ?? 'GIFT',
+            certificateNumber: $data['certificate-number'] ?? null,
+            customsCode: $data['customs-code'] ?? null,
+        );
+    }
 }

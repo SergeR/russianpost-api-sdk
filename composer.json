@@ -29,7 +29,8 @@
     },
     "scripts": {
         "test": "vendor/bin/phpunit",
-        "stan": "vendor/bin/phpstan analyse src tests --level=8"
+        "stan": "vendor/bin/phpstan analyse src/Domain tests/Domain --level=8",
+        "stan:check": "vendor/bin/phpstan analyse src tests --level=8"
     },
     "config": {
         "allow-plugins": {

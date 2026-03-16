@@ -6,6 +6,9 @@ namespace SergeR\RussianPostSDK\Dto;
 
 trait HasKebabCaseSerialization
 {
+    /**
+     * @return array<string,mixed>
+     */
     public function toArray(): array
     {
         $result = [];
@@ -15,7 +18,8 @@ trait HasKebabCaseSerialization
                 continue; // omit null fields
             }
             // camelCase → kebab-case
-            $key = strtolower(preg_replace('/[A-Z]/', '-$0', lcfirst($prop->getName())));
+            $propName = $prop->getName();
+            $key = strtolower(preg_replace('/[A-Z]/', '-$0', lcfirst($propName)) ?? '');
             $result[$key] = match (true) {
                 $value instanceof \BackedEnum => $value->value,
                 is_object($value) && method_exists($value, 'toArray') => $value->toArray(),

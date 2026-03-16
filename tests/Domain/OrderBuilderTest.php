@@ -198,9 +198,9 @@ final class OrderBuilderTest extends TestCase
         // Can then use builder to create a similar order
         $newOrder = OrderBuilder::create()
             ->orderNum('ORDER-007')
-            ->mailType($order->mailType)
-            ->mailCategory($order->mailCategory)
-            ->mass($order->mass)
+            ->mailType($order->mailType ?? MailType::ONLINE_PARCEL)
+            ->mailCategory($order->mailCategory ?? MailCategory::SIMPLE)
+            ->mass($order->mass ?? 500)
             ->recipientName('Similar User')
             ->addressTo($this->testAddress)
             ->build();

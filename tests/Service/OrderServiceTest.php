@@ -9,7 +9,8 @@ use Nyholm\Psr7\Factory\Psr17Factory;
 use PHPUnit\Framework\TestCase;
 use SergeR\RussianPostSDK\{Client, Config};
 use SergeR\RussianPostSDK\Domain\Order;
-use SergeR\RussianPostSDK\Enums\{MailType, MailCategory};
+use SergeR\RussianPostSDK\Dto\Request\Address;
+use SergeR\RussianPostSDK\Enums\{MailType, MailCategory, AddressType};
 use SergeR\RussianPostSDK\Exception\{AuthException, ValidationException};
 
 final class OrderServiceTest extends TestCase
@@ -138,13 +139,10 @@ final class OrderServiceTest extends TestCase
         }
     }
 
-    private function createMockAddress()
+    private function createMockAddress(): Address
     {
-        $mockClass = 'SergeR\\RussianPostSDK\\Dto\\Request\\Address';
-        $enum = 'SergeR\\RussianPostSDK\\Enums\\AddressType';
-
-        return new $mockClass(
-            addressType: $enum::DEFAULT,
+        return new Address(
+            addressType: AddressType::DEFAULT,
             postcode: '119991'
         );
     }

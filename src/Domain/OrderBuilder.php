@@ -157,6 +157,7 @@ final class OrderBuilder
     private ?int $shelfLifeDays = null;
     private ?int $bkHash = null;
     private ?int $smsNoticeRecipient = null;
+    /** @var list<string>|null */
     private ?array $postmarks = null;
 
     private function __construct() {}
@@ -402,6 +403,9 @@ final class OrderBuilder
         return $this;
     }
 
+    /**
+     * @param list<string> $postmarks
+     */
     public function postmarks(array $postmarks): self
     {
         $this->postmarks = $postmarks;

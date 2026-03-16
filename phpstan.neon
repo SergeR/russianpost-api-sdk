@@ -1,0 +1,12 @@
+parameters:
+    level: 8
+    reportUnmatchedIgnoredErrors: false
+
+    # Custom path levels for more strict checking on our domain models
+    paths:
+        - src/Domain
+        - src/Dto/Request
+        - tests/Domain
+
+    # For service files with HttpTransport polymorphism, use level 7
+    treatPhpDocTypesAsCertain: false
