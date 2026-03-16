@@ -8,7 +8,7 @@ use Http\Mock\Client as MockClient;
 use Nyholm\Psr7\Factory\Psr17Factory;
 use PHPUnit\Framework\TestCase;
 use SergeR\RussianPostSDK\{Client, Config};
-use SergeR\RussianPostSDK\Dto\Response\Order\OrderResponse;
+use SergeR\RussianPostSDK\Domain\Order;
 use SergeR\RussianPostSDK\Enums\{MailType, MailCategory};
 
 final class SmokeTest extends TestCase
@@ -38,7 +38,7 @@ final class SmokeTest extends TestCase
 
         $order = $client->orders()->findById(123);
 
-        self::assertInstanceOf(OrderResponse::class, $order);
+        self::assertInstanceOf(Order::class, $order);
         self::assertSame(123, $order->id);
         self::assertSame('Иван Иванов', $order->recipientName);
         self::assertSame(MailType::POSTAL_PARCEL, $order->mailType);

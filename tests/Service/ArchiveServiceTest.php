@@ -8,6 +8,7 @@ use Http\Mock\Client as MockClient;
 use Nyholm\Psr7\Factory\Psr17Factory;
 use PHPUnit\Framework\TestCase;
 use SergeR\RussianPostSDK\{Client, Config};
+use SergeR\RussianPostSDK\Domain\Archive;
 
 final class ArchiveServiceTest extends TestCase
 {
@@ -34,12 +35,17 @@ final class ArchiveServiceTest extends TestCase
         $this->mockClient->addResponse(
             $this->factory->createResponse(200)
                 ->withHeader('Content-Type', 'application/json')
-                ->withBody($this->factory->createStream(json_encode([], JSON_THROW_ON_ERROR)))
+                ->withBody($this->factory->createStream(json_encode([
+                    ['batch-name' => 'batch-001', 'status' => 'CREATED'],
+                ], JSON_THROW_ON_ERROR)))
         );
 
         $result = $this->client->archive()->list();
 
         self::assertIsArray($result);
+        if (count($result) > 0) {
+            self::assertInstanceOf(Archive::class, $result[0]);
+        }
     }
 
     public function testMoveToArchive(): void

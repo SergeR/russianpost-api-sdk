@@ -4,8 +4,7 @@ declare(strict_types=1);
 
 namespace SergeR\RussianPostSDK\Service;
 
-use SergeR\RussianPostSDK\Dto\Request\Order\CreateOrderRequest;
-use SergeR\RussianPostSDK\Dto\Response\Order\OrderResponse;
+use SergeR\RussianPostSDK\Domain\Order;
 use SergeR\RussianPostSDK\Http\HttpTransport;
 
 final class OrderService
@@ -14,48 +13,48 @@ final class OrderService
 
     /**
      * Create order via v1 endpoint
-     * @return OrderResponse
      */
-    public function create(CreateOrderRequest $req): OrderResponse
+    public function create(Order $order): Order
     {
-        $response = $this->transport->send('PUT', '/1.0/user/backlog', body: [$req->toArray()]);
-        return OrderResponse::fromArray(is_array($response) && isset($response[0]) ? $response[0] : $response);
+        $response = $this->transport->send('PUT', '/1.0/user/backlog', body: [$order->toArray()]);
+        return Order::fromArray(is_array($response) && isset($response[0]) ? $response[0] : $response);
     }
 
     /**
      * Create order via v2 endpoint
      */
-    public function createV2(CreateOrderRequest $req): OrderResponse
+    public function createV2(Order $order): Order
     {
-        $response = $this->transport->send('PUT', '/2.0/user/backlog', body: [$req->toArray()]);
-        return OrderResponse::fromArray(is_array($response) && isset($response[0]) ? $response[0] : $response);
+        $response = $this->transport->send('PUT', '/2.0/user/backlog', body: [$order->toArray()]);
+        return Order::fromArray(is_array($response) && isset($response[0]) ? $response[0] : $response);
     }
 
     /**
      * Find orders by query
-     * @return array<mixed>
+     * @return array<Order>
      */
     public function find(string $query): array
     {
-        return $this->transport->send('GET', '/1.0/backlog/search', query: ['query' => $query]);
+        $response = $this->transport->send('GET', '/1.0/backlog/search', query: ['query' => $query]);
+        return array_map(static fn(array $item) => Order::fromArray($item), $response);
     }
 
     /**
      * Find order by ID
      */
-    public function findById(int $id): OrderResponse
+    public function findById(int $id): Order
     {
         $response = $this->transport->send('GET', "/1.0/backlog/{$id}");
-        return OrderResponse::fromArray($response);
+        return Order::fromArray($response);
     }
 
     /**
      * Update order
      */
-    public function update(int $id, CreateOrderRequest $req): OrderResponse
+    public function update(int $id, Order $order): Order
     {
-        $response = $this->transport->send('PUT', "/1.0/user/backlog/{$id}", body: $req->toArray());
-        return OrderResponse::fromArray($response);
+        $response = $this->transport->send('PUT', "/1.0/user/backlog/{$id}", body: $order->toArray());
+        return Order::fromArray($response);
     }
 
     /**
@@ -80,10 +79,11 @@ final class OrderService
 
     /**
      * Find orders by group name
-     * @return array<mixed>
+     * @return array<Order>
      */
     public function findByGroup(string $groupName): array
     {
-        return $this->transport->send('GET', "/1.0/backlog/by-group-name/{$groupName}");
+        $response = $this->transport->send('GET', "/1.0/backlog/by-group-name/{$groupName}");
+        return array_map(static fn(array $item) => Order::fromArray($item), $response);
     }
 }

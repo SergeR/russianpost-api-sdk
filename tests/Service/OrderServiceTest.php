@@ -8,8 +8,7 @@ use Http\Mock\Client as MockClient;
 use Nyholm\Psr7\Factory\Psr17Factory;
 use PHPUnit\Framework\TestCase;
 use SergeR\RussianPostSDK\{Client, Config};
-use SergeR\RussianPostSDK\Dto\Request\Order\CreateOrderRequest;
-use SergeR\RussianPostSDK\Dto\Response\Order\OrderResponse;
+use SergeR\RussianPostSDK\Domain\Order;
 use SergeR\RussianPostSDK\Enums\{MailType, MailCategory};
 use SergeR\RussianPostSDK\Exception\{AuthException, ValidationException};
 
@@ -49,7 +48,7 @@ final class OrderServiceTest extends TestCase
 
         $order = $this->client->orders()->findById(123);
 
-        self::assertInstanceOf(OrderResponse::class, $order);
+        self::assertInstanceOf(Order::class, $order);
         self::assertSame(123, $order->id);
         self::assertSame('Иван Иванов', $order->recipientName);
         self::assertSame(500, $order->mass);
@@ -68,7 +67,7 @@ final class OrderServiceTest extends TestCase
                 ], JSON_THROW_ON_ERROR)))
         );
 
-        $request = new CreateOrderRequest(
+        $order = new Order(
             orderNum: 'ORDER-001',
             mailType: MailType::POSTAL_PARCEL,
             mailCategory: MailCategory::SIMPLE,
@@ -87,10 +86,10 @@ final class OrderServiceTest extends TestCase
             addressTypeTo: 'DEFAULT',
         );
 
-        $order = $this->client->orders()->create($request);
+        $result = $this->client->orders()->create($order);
 
-        self::assertSame(456, $order->id);
-        self::assertSame(MailType::POSTAL_PARCEL, $order->mailType);
+        self::assertSame(456, $result->id);
+        self::assertSame(MailType::POSTAL_PARCEL, $result->mailType);
     }
 
     public function testDeleteSendsDeleteRequest(): void

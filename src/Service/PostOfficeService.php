@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace SergeR\RussianPostSDK\Service;
 
+use SergeR\RussianPostSDK\Domain\PostOffice;
 use SergeR\RussianPostSDK\Dto\Response\BinaryResponse;
 use SergeR\RussianPostSDK\Http\HttpTransport;
 
@@ -14,24 +15,26 @@ final class PostOfficeService
     /**
      * Find post offices by postcode
      * @param array<string,mixed> $options
-     * @return array<mixed>
+     * @return array<PostOffice>
      */
     public function findByPostcode(string $postalCode, float $lat, float $lng, array $options = []): array
     {
         $query = ['lat' => $lat, 'lng' => $lng, ...$options];
-        return $this->transport->send('GET', "/postoffice/1.0/{$postalCode}", query: $query);
+        $response = $this->transport->send('GET', "/postoffice/1.0/{$postalCode}", query: $query);
+        return array_map(static fn(array $item) => PostOffice::fromArray($item), $response);
     }
 
     /**
      * Find post offices by address
-     * @return array<mixed>
+     * @return array<PostOffice>
      */
     public function findByAddress(string $address, int $top = 3): array
     {
-        return $this->transport->send('GET', '/postoffice/1.0/by-address', query: [
+        $response = $this->transport->send('GET', '/postoffice/1.0/by-address', query: [
             'address' => $address,
             'top' => $top,
         ]);
+        return array_map(static fn(array $item) => PostOffice::fromArray($item), $response);
     }
 
     /**
@@ -55,12 +58,13 @@ final class PostOfficeService
     /**
      * Find nearby post offices
      * @param array<string,mixed> $options
-     * @return array<mixed>
+     * @return array<PostOffice>
      */
     public function findNearby(float $lat, float $lng, array $options = []): array
     {
         $query = ['lat' => $lat, 'lng' => $lng, ...$options];
-        return $this->transport->send('GET', '/postoffice/1.0/nearby', query: $query);
+        $response = $this->transport->send('GET', '/postoffice/1.0/nearby', query: $query);
+        return array_map(static fn(array $item) => PostOffice::fromArray($item), $response);
     }
 
     /**

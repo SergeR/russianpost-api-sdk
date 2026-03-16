@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace SergeR\RussianPostSDK\Service;
 
+use SergeR\RussianPostSDK\Domain\TimeSlot;
 use SergeR\RussianPostSDK\Http\HttpTransport;
 
 final class TimeSlotService
@@ -13,11 +14,12 @@ final class TimeSlotService
     /**
      * Get available timeslots
      * @param array<string,mixed> $params
-     * @return array<mixed>
+     * @return array<TimeSlot>
      */
     public function getAvailable(array $params): array
     {
-        return $this->transport->send('GET', '/external/v1/timeslots-by-postindex', query: $params);
+        $response = $this->transport->send('GET', '/external/v1/timeslots-by-postindex', query: $params);
+        return array_map(static fn(array $item) => TimeSlot::fromArray($item), $response);
     }
 
     /**
@@ -44,7 +46,7 @@ final class TimeSlotService
 
     /**
      * Get timeslots available for rebooking
-     * @return array<mixed>
+     * @return array<TimeSlot>
      */
     public function getForRebooking(string $uuidOrBarcode, string $plannedDate, ?string $contractNumber = null): array
     {
@@ -56,7 +58,8 @@ final class TimeSlotService
             $query['contract-number'] = $contractNumber;
         }
 
-        return $this->transport->send('GET', '/external/v1/timeslots-for-rebooking', query: $query);
+        $response = $this->transport->send('GET', '/external/v1/timeslots-for-rebooking', query: $query);
+        return array_map(static fn(array $item) => TimeSlot::fromArray($item), $response);
     }
 
     /**

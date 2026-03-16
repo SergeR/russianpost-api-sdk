@@ -8,7 +8,7 @@ use Http\Mock\Client as MockClient;
 use Nyholm\Psr7\Factory\Psr17Factory;
 use PHPUnit\Framework\TestCase;
 use SergeR\RussianPostSDK\{Client, Config};
-use SergeR\RussianPostSDK\Dto\Response\Batch\BatchResponse;
+use SergeR\RussianPostSDK\Domain\Batch;
 
 final class BatchServiceTest extends TestCase
 {
@@ -46,7 +46,7 @@ final class BatchServiceTest extends TestCase
 
         $batch = $this->client->batches()->find('batch-001');
 
-        self::assertInstanceOf(BatchResponse::class, $batch);
+        self::assertInstanceOf(Batch::class, $batch);
         self::assertSame('batch-001', $batch->batchName);
         self::assertSame(5, $batch->count);
     }

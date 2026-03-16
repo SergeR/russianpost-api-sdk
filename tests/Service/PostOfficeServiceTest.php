@@ -8,6 +8,7 @@ use Http\Mock\Client as MockClient;
 use Nyholm\Psr7\Factory\Psr17Factory;
 use PHPUnit\Framework\TestCase;
 use SergeR\RussianPostSDK\{Client, Config};
+use SergeR\RussianPostSDK\Domain\PostOffice;
 
 final class PostOfficeServiceTest extends TestCase
 {
@@ -34,12 +35,17 @@ final class PostOfficeServiceTest extends TestCase
         $this->mockClient->addResponse(
             $this->factory->createResponse(200)
                 ->withHeader('Content-Type', 'application/json')
-                ->withBody($this->factory->createStream(json_encode([], JSON_THROW_ON_ERROR)))
+                ->withBody($this->factory->createStream(json_encode([
+                    ['postal-code' => '119991', 'name' => 'Main PO', 'latitude' => 55.7558, 'longitude' => 37.6173],
+                ], JSON_THROW_ON_ERROR)))
         );
 
         $result = $this->client->postOffice()->findByPostcode('119991', 55.7558, 37.6173);
 
         self::assertIsArray($result);
+        if (count($result) > 0) {
+            self::assertInstanceOf(PostOffice::class, $result[0]);
+        }
     }
 
     public function testGetServices(): void
@@ -60,11 +66,16 @@ final class PostOfficeServiceTest extends TestCase
         $this->mockClient->addResponse(
             $this->factory->createResponse(200)
                 ->withHeader('Content-Type', 'application/json')
-                ->withBody($this->factory->createStream(json_encode([], JSON_THROW_ON_ERROR)))
+                ->withBody($this->factory->createStream(json_encode([
+                    ['postal-code' => '119991', 'name' => 'Near PO'],
+                ], JSON_THROW_ON_ERROR)))
         );
 
         $result = $this->client->postOffice()->findNearby(55.7558, 37.6173);
 
         self::assertIsArray($result);
+        if (count($result) > 0) {
+            self::assertInstanceOf(PostOffice::class, $result[0]);
+        }
     }
 }

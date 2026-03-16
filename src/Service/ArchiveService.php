@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace SergeR\RussianPostSDK\Service;
 
+use SergeR\RussianPostSDK\Domain\Archive;
 use SergeR\RussianPostSDK\Http\HttpTransport;
 
 final class ArchiveService
@@ -12,11 +13,12 @@ final class ArchiveService
 
     /**
      * List archived batches
-     * @return array<mixed>
+     * @return array<Archive>
      */
     public function list(): array
     {
-        return $this->transport->send('GET', '/1.0/archive');
+        $response = $this->transport->send('GET', '/1.0/archive');
+        return array_map(static fn(array $item) => Archive::fromArray($item), $response);
     }
 
     /**

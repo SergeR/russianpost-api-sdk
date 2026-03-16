@@ -4,8 +4,7 @@ declare(strict_types=1);
 
 namespace SergeR\RussianPostSDK\Service;
 
-use SergeR\RussianPostSDK\Dto\Response\Batch\BatchResponse;
-use SergeR\RussianPostSDK\Dto\Response\Order\OrderResponse;
+use SergeR\RussianPostSDK\Domain\{Batch, Order};
 use SergeR\RussianPostSDK\Http\HttpTransport;
 
 final class BatchService
@@ -55,10 +54,10 @@ final class BatchService
     /**
      * Find batch by name
      */
-    public function find(string $name): BatchResponse
+    public function find(string $name): Batch
     {
         $response = $this->transport->send('GET', "/1.0/batch/{$name}");
-        return BatchResponse::fromArray($response);
+        return Batch::fromArray($response);
     }
 
     /**
@@ -116,10 +115,10 @@ final class BatchService
     /**
      * Find order in shipment by ID
      */
-    public function findOrderById(int $id): OrderResponse
+    public function findOrderById(int $id): Order
     {
         $response = $this->transport->send('GET', "/1.0/shipment/{$id}");
-        return OrderResponse::fromArray($response);
+        return Order::fromArray($response);
     }
 
     /**

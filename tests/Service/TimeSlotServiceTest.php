@@ -8,6 +8,7 @@ use Http\Mock\Client as MockClient;
 use Nyholm\Psr7\Factory\Psr17Factory;
 use PHPUnit\Framework\TestCase;
 use SergeR\RussianPostSDK\{Client, Config};
+use SergeR\RussianPostSDK\Domain\TimeSlot;
 use SergeR\RussianPostSDK\Exception\ValidationException;
 
 final class TimeSlotServiceTest extends TestCase
@@ -35,12 +36,17 @@ final class TimeSlotServiceTest extends TestCase
         $this->mockClient->addResponse(
             $this->factory->createResponse(200)
                 ->withHeader('Content-Type', 'application/json')
-                ->withBody($this->factory->createStream(json_encode([], JSON_THROW_ON_ERROR)))
+                ->withBody($this->factory->createStream(json_encode([
+                    ['date' => '2026-03-20', 'time-start' => '10:00', 'time-end' => '12:00'],
+                ], JSON_THROW_ON_ERROR)))
         );
 
         $result = $this->client->timeSlots()->getAvailable(['post-index' => '119991']);
 
         self::assertIsArray($result);
+        if (count($result) > 0) {
+            self::assertInstanceOf(TimeSlot::class, $result[0]);
+        }
     }
 
     public function testBook(): void
