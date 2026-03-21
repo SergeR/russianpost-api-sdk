@@ -466,6 +466,217 @@ components:
         with-simple-notice:
           type: boolean
           description: С простым уведомлением
+        with-uzeuv-notice:
+          type: boolean
+          description: С ЮЗЭУВ
+        wo-mail-rank:
+          type: boolean
+          description: Без разряда
+        easy-return:
+          type: boolean
+          description: Лёгкий возврат
+        farma:
+          type: boolean
+          description: Фарма
+        delivery-to-door:
+          type: boolean
+          description: Доставка до двери
+        manual-address-input:
+          type: boolean
+          description: Признак ручного ввода адреса
+        no-return:
+          type: boolean
+          description: Возврату не подлежит
+        with-discount:
+          type: boolean
+          description: Тариф со скидкой
+        with-documents:
+          type: boolean
+          description: С документами (для ЕМС международного)
+        with-goods:
+          type: boolean
+          description: С товарами (для ЕМС международного)
+        with-packaging:
+          type: boolean
+          description: С упаковкой
+        prepaid-amount:
+          type: integer
+          description: Сумма частичной предоплаты
+          minimum: 0
+        time-slot-id:
+          type: integer
+          description: Идентификатор временного интервала
+        seller-id:
+          type: string
+          description: Идентификатор отправителя на торговой площадке
+        tariff-full-rate:
+          type: string
+          description: Итоговая стоимость отправления без скидки без учета НДС
+        tariff-full-rate-vat:
+          type: string
+          description: НДС итоговой стоимости отправления без скидки
+        tariff-full-rate-with-vat:
+          type: string
+          description: Итоговая стоимость отправления без скидки с учетом НДС
+        tariff-discount-rate:
+          type: string
+          description: Итоговая стоимость отправления со скидкой без учета НДС
+        tariff-discount-rate-vat:
+          type: string
+          description: НДС итоговой стоимости отправления со скидкой
+        tariff-discount-rate-with-vat:
+          type: string
+          description: Итоговая стоимость отправления со скидкой с учетом НДС
+        goods:
+          $ref: '#/components/schemas/Goods'
+        ecom-data:
+          $ref: '#/components/schemas/EcomData'
+        fiscal-data:
+          $ref: '#/components/schemas/FiscalData'
+        payment-details:
+          $ref: '#/components/schemas/PaymentDetails'
+
+    Goods:
+      type: object
+      description: Товарное вложение РПО
+      properties:
+        items:
+          type: array
+          description: Список товаров
+          items:
+            $ref: '#/components/schemas/GoodsItem'
+
+    GoodsItem:
+      type: object
+      description: Элемент товарного вложения
+      required:
+        - description
+        - quantity
+      properties:
+        description:
+          type: string
+          description: Наименование товара
+        quantity:
+          type: number
+          description: Количество товара
+        code:
+          type: string
+          description: Код (маркировка) товара
+        country-code:
+          type: integer
+          description: Код страны происхождения
+        customs-declaration-number:
+          type: string
+          description: Номер таможенной декларации
+        excise:
+          type: integer
+          description: Акциз (копейки)
+        good-id:
+          type: string
+          description: Внутренний идентификатор товара
+        goods-type:
+          type: string
+          description: Признак товар или услуга
+        insr-value:
+          type: integer
+          description: Объявленная ценность (копейки)
+        item-number:
+          type: string
+          description: Номенклатура (артикул) товара
+        lineattr:
+          type: integer
+          description: Признак предмета расчета
+        payattr:
+          type: integer
+          description: Признак способа расчета
+        service-type:
+          type: integer
+          description: Вид сервиса для товара
+        supplier-inn:
+          type: string
+          description: ИНН поставщика товара
+        supplier-name:
+          type: string
+          description: Наименование поставщика товара
+        supplier-phone:
+          type: string
+          description: Телефон поставщика товара
+        value:
+          type: integer
+          description: Цена за единицу товара в копейках
+        vat-rate:
+          type: integer
+          description: Ставка НДС
+        weight:
+          type: integer
+          description: Вес товара (в граммах)
+
+    EcomData:
+      type: object
+      description: Данные отправления ЕКОМ
+      properties:
+        delivery-point-index:
+          type: string
+          description: Идентификатор пункта выдачи заказов
+        identity-methods:
+          type: array
+          description: Методы идентификации
+          items:
+            type: string
+        services:
+          type: array
+          description: Сервисы ЕКОМ
+          items:
+            type: string
+
+    FiscalData:
+      type: object
+      description: Фискальные данные
+      properties:
+        customer-email:
+          type: string
+          description: Адрес электронной почты плательщика
+        customer-inn:
+          type: string
+          description: ИНН юридического лица покупателя
+        customer-name:
+          type: string
+          description: Наименование юридического лица покупателя
+        customer-phone:
+          type: integer
+          description: Телефон плательщика
+        payment-amount:
+          type: integer
+          description: Сумма предоплаты (копейки)
+
+    PaymentDetails:
+      type: object
+      description: Реквизиты получателя наложенного платежа
+      properties:
+        recipient-surname:
+          type: string
+          description: Фамилия получателя наложенного платежа
+        recipient-firstname:
+          type: string
+          description: Имя получателя наложенного платежа
+        recipient-middlename:
+          type: string
+          description: Отчество получателя наложенного платежа
+        bank-name:
+          type: string
+          description: Наименование банка получателя наложенного платежа
+        bank-bik:
+          type: string
+          description: БИК банка получателя наложенного платежа
+        bank-corr-account:
+          type: string
+          description: Корреспондентский счет получателя наложенного платежа
+        bank-account:
+          type: string
+          description: Счет получателя наложенного платежа
+        is-cash:
+          type: string
+          description: Признак получения наложенного платежа наличными
 
     OrderCreateRequest:
       type: array

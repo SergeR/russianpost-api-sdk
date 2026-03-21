@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace SergeR\RussianPostSDK\Domain;
 
-use SergeR\RussianPostSDK\Dto\Request\{Address, Dimension, CustomsDeclaration};
+use SergeR\RussianPostSDK\Dto\Request\{Address, Dimension, CustomsDeclaration, Goods, EcomData, FiscalData, PaymentDetails};
 use SergeR\RussianPostSDK\Enums\{MailType, MailCategory};
 
 /**
@@ -157,6 +157,35 @@ final class OrderBuilder
     private ?int $shelfLifeDays = null;
     private ?int $bkHash = null;
     private ?int $smsNoticeRecipient = null;
+    private ?bool $deliveryToDoor = null;
+    private ?bool $easyReturn = null;
+    private ?bool $farma = null;
+    private ?bool $inventory = null;
+    private ?bool $manualAddressInput = null;
+    private ?bool $noReturn = null;
+    private ?bool $vsd = null;
+    private ?bool $withDiscount = null;
+    private ?bool $withDocuments = null;
+    private ?bool $withElectronicNotice = null;
+    private ?bool $withGoods = null;
+    private ?bool $withOrderOfNotice = null;
+    private ?bool $withPackaging = null;
+    private ?bool $withSimpleNotice = null;
+    private ?bool $withUzeuVNotice = null;
+    private ?bool $woMailRank = null;
+    private ?int $prepaidAmount = null;
+    private ?int $timeSlotId = null;
+    private ?string $sellerId = null;
+    private ?string $tariffFullRate = null;
+    private ?string $tariffFullRateVat = null;
+    private ?string $tariffFullRateWithVat = null;
+    private ?string $tariffDiscountRate = null;
+    private ?string $tariffDiscountRateVat = null;
+    private ?string $tariffDiscountRateWithVat = null;
+    private ?Goods $goods = null;
+    private ?EcomData $ecomData = null;
+    private ?FiscalData $fiscalData = null;
+    private ?PaymentDetails $paymentDetails = null;
     /** @var list<string>|null */
     private ?array $postmarks = null;
 
@@ -412,6 +441,180 @@ final class OrderBuilder
         return $this;
     }
 
+    public function deliveryToDoor(bool $deliveryToDoor): self
+    {
+        $this->deliveryToDoor = $deliveryToDoor;
+        return $this;
+    }
+
+    public function easyReturn(bool $easyReturn): self
+    {
+        $this->easyReturn = $easyReturn;
+        return $this;
+    }
+
+    public function farma(bool $farma): self
+    {
+        $this->farma = $farma;
+        return $this;
+    }
+
+    public function inventory(bool $inventory): self
+    {
+        $this->inventory = $inventory;
+        return $this;
+    }
+
+    public function manualAddressInput(bool $manualAddressInput): self
+    {
+        $this->manualAddressInput = $manualAddressInput;
+        return $this;
+    }
+
+    public function noReturn(bool $noReturn): self
+    {
+        $this->noReturn = $noReturn;
+        return $this;
+    }
+
+    public function vsd(bool $vsd): self
+    {
+        $this->vsd = $vsd;
+        return $this;
+    }
+
+    public function withDiscount(bool $withDiscount): self
+    {
+        $this->withDiscount = $withDiscount;
+        return $this;
+    }
+
+    public function withDocuments(bool $withDocuments): self
+    {
+        $this->withDocuments = $withDocuments;
+        return $this;
+    }
+
+    public function withElectronicNotice(bool $withElectronicNotice): self
+    {
+        $this->withElectronicNotice = $withElectronicNotice;
+        return $this;
+    }
+
+    public function withGoods(bool $withGoods): self
+    {
+        $this->withGoods = $withGoods;
+        return $this;
+    }
+
+    public function withOrderOfNotice(bool $withOrderOfNotice): self
+    {
+        $this->withOrderOfNotice = $withOrderOfNotice;
+        return $this;
+    }
+
+    public function withPackaging(bool $withPackaging): self
+    {
+        $this->withPackaging = $withPackaging;
+        return $this;
+    }
+
+    public function withSimpleNotice(bool $withSimpleNotice): self
+    {
+        $this->withSimpleNotice = $withSimpleNotice;
+        return $this;
+    }
+
+    public function withUzeuVNotice(bool $withUzeuVNotice): self
+    {
+        $this->withUzeuVNotice = $withUzeuVNotice;
+        return $this;
+    }
+
+    public function woMailRank(bool $woMailRank): self
+    {
+        $this->woMailRank = $woMailRank;
+        return $this;
+    }
+
+    public function prepaidAmount(int $prepaidAmount): self
+    {
+        $this->prepaidAmount = $prepaidAmount;
+        return $this;
+    }
+
+    public function timeSlotId(int $timeSlotId): self
+    {
+        $this->timeSlotId = $timeSlotId;
+        return $this;
+    }
+
+    public function sellerId(string $sellerId): self
+    {
+        $this->sellerId = $sellerId;
+        return $this;
+    }
+
+    public function tariffFullRate(string $tariffFullRate): self
+    {
+        $this->tariffFullRate = $tariffFullRate;
+        return $this;
+    }
+
+    public function tariffFullRateVat(string $tariffFullRateVat): self
+    {
+        $this->tariffFullRateVat = $tariffFullRateVat;
+        return $this;
+    }
+
+    public function tariffFullRateWithVat(string $tariffFullRateWithVat): self
+    {
+        $this->tariffFullRateWithVat = $tariffFullRateWithVat;
+        return $this;
+    }
+
+    public function tariffDiscountRate(string $tariffDiscountRate): self
+    {
+        $this->tariffDiscountRate = $tariffDiscountRate;
+        return $this;
+    }
+
+    public function tariffDiscountRateVat(string $tariffDiscountRateVat): self
+    {
+        $this->tariffDiscountRateVat = $tariffDiscountRateVat;
+        return $this;
+    }
+
+    public function tariffDiscountRateWithVat(string $tariffDiscountRateWithVat): self
+    {
+        $this->tariffDiscountRateWithVat = $tariffDiscountRateWithVat;
+        return $this;
+    }
+
+    public function goods(Goods $goods): self
+    {
+        $this->goods = $goods;
+        return $this;
+    }
+
+    public function ecomData(EcomData $ecomData): self
+    {
+        $this->ecomData = $ecomData;
+        return $this;
+    }
+
+    public function fiscalData(FiscalData $fiscalData): self
+    {
+        $this->fiscalData = $fiscalData;
+        return $this;
+    }
+
+    public function paymentDetails(PaymentDetails $paymentDetails): self
+    {
+        $this->paymentDetails = $paymentDetails;
+        return $this;
+    }
+
     /**
      * Build and validate the Order.
      *
@@ -556,6 +759,35 @@ final class OrderBuilder
             shelfLifeDays: $this->shelfLifeDays,
             bkHash: $this->bkHash,
             smsNoticeRecipient: $this->smsNoticeRecipient,
+            deliveryToDoor: $this->deliveryToDoor,
+            easyReturn: $this->easyReturn,
+            farma: $this->farma,
+            inventory: $this->inventory,
+            manualAddressInput: $this->manualAddressInput,
+            noReturn: $this->noReturn,
+            vsd: $this->vsd,
+            withDiscount: $this->withDiscount,
+            withDocuments: $this->withDocuments,
+            withElectronicNotice: $this->withElectronicNotice,
+            withGoods: $this->withGoods,
+            withOrderOfNotice: $this->withOrderOfNotice,
+            withPackaging: $this->withPackaging,
+            withSimpleNotice: $this->withSimpleNotice,
+            withUzeuVNotice: $this->withUzeuVNotice,
+            woMailRank: $this->woMailRank,
+            prepaidAmount: $this->prepaidAmount,
+            timeSlotId: $this->timeSlotId,
+            sellerId: $this->sellerId,
+            tariffFullRate: $this->tariffFullRate,
+            tariffFullRateVat: $this->tariffFullRateVat,
+            tariffFullRateWithVat: $this->tariffFullRateWithVat,
+            tariffDiscountRate: $this->tariffDiscountRate,
+            tariffDiscountRateVat: $this->tariffDiscountRateVat,
+            tariffDiscountRateWithVat: $this->tariffDiscountRateWithVat,
+            goods: $this->goods,
+            ecomData: $this->ecomData,
+            fiscalData: $this->fiscalData,
+            paymentDetails: $this->paymentDetails,
             postmarks: $this->postmarks,
         );
     }

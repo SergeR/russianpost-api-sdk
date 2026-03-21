@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace SergeR\RussianPostSDK\Domain;
 
-use SergeR\RussianPostSDK\Dto\Request\{Address, Dimension, CustomsDeclaration};
+use SergeR\RussianPostSDK\Dto\Request\{Address, Dimension, CustomsDeclaration, Goods, EcomData, FiscalData, PaymentDetails};
 use SergeR\RussianPostSDK\Enums\{MailType, MailCategory, AddressType};
 
 /**
@@ -175,6 +175,43 @@ final readonly class Order
         public ?int $smsNoticeRecipient = null,
         public ?string $declarationNumber = null,
 
+        // Доп. услуги и отметки
+        public ?bool $deliveryToDoor = null,
+        public ?bool $easyReturn = null,
+        public ?bool $farma = null,
+        public ?bool $inventory = null,
+        public ?bool $manualAddressInput = null,
+        public ?bool $noReturn = null,
+        public ?bool $vsd = null,
+        public ?bool $withDiscount = null,
+        public ?bool $withDocuments = null,
+        public ?bool $withElectronicNotice = null,
+        public ?bool $withGoods = null,
+        public ?bool $withOrderOfNotice = null,
+        public ?bool $withPackaging = null,
+        public ?bool $withSimpleNotice = null,
+        public ?bool $withUzeuVNotice = null,
+        public ?bool $woMailRank = null,
+
+        // Платежные параметры и временной интервал
+        public ?int $prepaidAmount = null,
+        public ?int $timeSlotId = null,
+        public ?string $sellerId = null,
+
+        // Тариф-информация
+        public ?string $tariffFullRate = null,
+        public ?string $tariffFullRateVat = null,
+        public ?string $tariffFullRateWithVat = null,
+        public ?string $tariffDiscountRate = null,
+        public ?string $tariffDiscountRateVat = null,
+        public ?string $tariffDiscountRateWithVat = null,
+
+        // Сложные DTO объекты
+        public ?Goods $goods = null,
+        public ?EcomData $ecomData = null,
+        public ?FiscalData $fiscalData = null,
+        public ?PaymentDetails $paymentDetails = null,
+
         // Коллекции
         /** @var list<string> */
         public ?array $postmarks = null,
@@ -306,6 +343,93 @@ final readonly class Order
         }
         if ($this->numAddressTypeTo !== null) {
             $data['num-address-type-to'] = $this->numAddressTypeTo;
+        }
+        if ($this->deliveryToDoor !== null) {
+            $data['delivery-to-door'] = $this->deliveryToDoor;
+        }
+        if ($this->easyReturn !== null) {
+            $data['easy-return'] = $this->easyReturn;
+        }
+        if ($this->farma !== null) {
+            $data['farma'] = $this->farma;
+        }
+        if ($this->inventory !== null) {
+            $data['inventory'] = $this->inventory;
+        }
+        if ($this->manualAddressInput !== null) {
+            $data['manual-address-input'] = $this->manualAddressInput;
+        }
+        if ($this->noReturn !== null) {
+            $data['no-return'] = $this->noReturn;
+        }
+        if ($this->vsd !== null) {
+            $data['vsd'] = $this->vsd;
+        }
+        if ($this->withDiscount !== null) {
+            $data['with-discount'] = $this->withDiscount;
+        }
+        if ($this->withDocuments !== null) {
+            $data['with-documents'] = $this->withDocuments;
+        }
+        if ($this->withElectronicNotice !== null) {
+            $data['with-electronic-notice'] = $this->withElectronicNotice;
+        }
+        if ($this->withGoods !== null) {
+            $data['with-goods'] = $this->withGoods;
+        }
+        if ($this->withOrderOfNotice !== null) {
+            $data['with-order-of-notice'] = $this->withOrderOfNotice;
+        }
+        if ($this->withPackaging !== null) {
+            $data['with-packaging'] = $this->withPackaging;
+        }
+        if ($this->withSimpleNotice !== null) {
+            $data['with-simple-notice'] = $this->withSimpleNotice;
+        }
+        if ($this->withUzeuVNotice !== null) {
+            $data['with-uzeuv-notice'] = $this->withUzeuVNotice;
+        }
+        if ($this->woMailRank !== null) {
+            $data['wo-mail-rank'] = $this->woMailRank;
+        }
+        if ($this->prepaidAmount !== null) {
+            $data['prepaid-amount'] = $this->prepaidAmount;
+        }
+        if ($this->timeSlotId !== null) {
+            $data['time-slot-id'] = $this->timeSlotId;
+        }
+        if ($this->sellerId !== null) {
+            $data['seller-id'] = $this->sellerId;
+        }
+        if ($this->tariffFullRate !== null) {
+            $data['tariff-full-rate'] = $this->tariffFullRate;
+        }
+        if ($this->tariffFullRateVat !== null) {
+            $data['tariff-full-rate-vat'] = $this->tariffFullRateVat;
+        }
+        if ($this->tariffFullRateWithVat !== null) {
+            $data['tariff-full-rate-with-vat'] = $this->tariffFullRateWithVat;
+        }
+        if ($this->tariffDiscountRate !== null) {
+            $data['tariff-discount-rate'] = $this->tariffDiscountRate;
+        }
+        if ($this->tariffDiscountRateVat !== null) {
+            $data['tariff-discount-rate-vat'] = $this->tariffDiscountRateVat;
+        }
+        if ($this->tariffDiscountRateWithVat !== null) {
+            $data['tariff-discount-rate-with-vat'] = $this->tariffDiscountRateWithVat;
+        }
+        if ($this->goods !== null) {
+            $data['goods'] = $this->goods->toArray();
+        }
+        if ($this->ecomData !== null) {
+            $data['ecom-data'] = $this->ecomData->toArray();
+        }
+        if ($this->fiscalData !== null) {
+            $data['fiscal-data'] = $this->fiscalData->toArray();
+        }
+        if ($this->paymentDetails !== null) {
+            $data['payment-details'] = $this->paymentDetails->toArray();
         }
 
         return $data;
@@ -453,6 +577,36 @@ final readonly class Order
             shelfLifeDays: $data['shelf-life-days'] ?? null,
             bkHash: $data['bk-hash'] ?? null,
             smsNoticeRecipient: $data['sms-notice-recipient'] ?? null,
+            declarationNumber: $data['declaration-number'] ?? null,
+            deliveryToDoor: $data['delivery-to-door'] ?? null,
+            easyReturn: $data['easy-return'] ?? null,
+            farma: $data['farma'] ?? null,
+            inventory: $data['inventory'] ?? null,
+            manualAddressInput: $data['manual-address-input'] ?? null,
+            noReturn: $data['no-return'] ?? null,
+            vsd: $data['vsd'] ?? null,
+            withDiscount: $data['with-discount'] ?? null,
+            withDocuments: $data['with-documents'] ?? null,
+            withElectronicNotice: $data['with-electronic-notice'] ?? null,
+            withGoods: $data['with-goods'] ?? null,
+            withOrderOfNotice: $data['with-order-of-notice'] ?? null,
+            withPackaging: $data['with-packaging'] ?? null,
+            withSimpleNotice: $data['with-simple-notice'] ?? null,
+            withUzeuVNotice: $data['with-uzeuv-notice'] ?? null,
+            woMailRank: $data['wo-mail-rank'] ?? null,
+            prepaidAmount: $data['prepaid-amount'] ?? null,
+            timeSlotId: $data['time-slot-id'] ?? null,
+            sellerId: $data['seller-id'] ?? null,
+            tariffFullRate: $data['tariff-full-rate'] ?? null,
+            tariffFullRateVat: $data['tariff-full-rate-vat'] ?? null,
+            tariffFullRateWithVat: $data['tariff-full-rate-with-vat'] ?? null,
+            tariffDiscountRate: $data['tariff-discount-rate'] ?? null,
+            tariffDiscountRateVat: $data['tariff-discount-rate-vat'] ?? null,
+            tariffDiscountRateWithVat: $data['tariff-discount-rate-with-vat'] ?? null,
+            goods: isset($data['goods']) ? Goods::fromArray($data['goods']) : null,
+            ecomData: isset($data['ecom-data']) ? EcomData::fromArray($data['ecom-data']) : null,
+            fiscalData: isset($data['fiscal-data']) ? FiscalData::fromArray($data['fiscal-data']) : null,
+            paymentDetails: isset($data['payment-details']) ? PaymentDetails::fromArray($data['payment-details']) : null,
             postmarks: $data['postmarks'] ?? null,
         );
     }

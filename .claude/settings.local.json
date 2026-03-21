@@ -2,7 +2,11 @@
   "permissions": {
     "allow": [
       "Bash(composer test:*)",
-      "Bash(cd:*)"
+      "Bash(cd:*)",
+      "Bash(php:*)",
+      "Bash(vendor/bin/phpunit tests/ -v 2>&1 | head -100)",
+      "Bash(vendor/bin/phpunit tests/ 2>&1 | head -150)",
+      "Bash(vendor/bin/phpstan analyse:*)"
     ]
   }
 }
