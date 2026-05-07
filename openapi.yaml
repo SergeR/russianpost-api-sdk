@@ -3475,7 +3475,7 @@ paths:
         '401':
           $ref: '#/components/responses/Unauthorized'
 
-  /1.0/postoffice/{zip-code}:
+  /postoffice/1.0/{zip-code}:
     get:
       tags:
         - post-offices
@@ -3502,7 +3502,7 @@ paths:
         '404':
           $ref: '#/components/responses/NotFound'
 
-  /1.0/postoffice/by-address:
+  /postoffice/1.0/by-address:
     get:
       tags:
         - post-offices
@@ -3531,13 +3531,21 @@ paths:
         '401':
           $ref: '#/components/responses/Unauthorized'
 
-  /1.0/postoffice/services:
+  /postoffice/1.0/{postal-code}/services:
     get:
       tags:
         - post-offices
-      summary: Получить все сервисы ОПС
-      description: Returns a full list of services available across post offices.
+      summary: Получить сервисы ОПС по индексу
+      description: Returns a list of services available at the post office with the given postal code.
       operationId: getPostOfficeServices
+      parameters:
+        - name: postal-code
+          in: path
+          required: true
+          description: Почтовый индекс (6 цифр)
+          schema:
+            type: string
+            pattern: '^[0-9]{6}$'
       responses:
         '200':
           description: Список сервисов
@@ -3548,15 +3556,22 @@ paths:
         '401':
           $ref: '#/components/responses/Unauthorized'
 
-  /1.0/postoffice/services/group/{group-id}:
+  /postoffice/1.0/{postal-code}/services/{service-group-id}:
     get:
       tags:
         - post-offices
       summary: Получить сервисы ОПС по группе
-      description: Returns services of post offices belonging to the specified service group.
+      description: Returns services of the post office with the given postal code belonging to the specified service group.
       operationId: getPostOfficeServicesByGroup
       parameters:
-        - name: group-id
+        - name: postal-code
+          in: path
+          required: true
+          description: Почтовый индекс (6 цифр)
+          schema:
+            type: string
+            pattern: '^[0-9]{6}$'
+        - name: service-group-id
           in: path
           required: true
           description: Идентификатор группы сервисов
@@ -3572,7 +3587,7 @@ paths:
         '401':
           $ref: '#/components/responses/Unauthorized'
 
-  /1.0/postoffice/nearby:
+  /postoffice/1.0/nearby:
     get:
       tags:
         - post-offices
@@ -3612,7 +3627,7 @@ paths:
         '401':
           $ref: '#/components/responses/Unauthorized'
 
-  /1.0/postoffice/settlement-codes:
+  /postoffice/1.0/settlement.offices.codes:
     get:
       tags:
         - post-offices
