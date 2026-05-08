@@ -118,7 +118,8 @@ final class UtilityServiceTest extends TestCase
         self::assertTrue($result[0]->isAgreement);
         self::assertSame('пр-кт Ленинградский, д.23, г Москва', $result[0]->opsAddress);
         self::assertFalse($result[0]->prePostalPreparation);
-        self::assertSame(ReturnAddressType::POSTOFFICE_ADDRESS, $result[0]->returnAddressType);
+        self::assertSame('POSTOFFICE_ADDRESS', $result[0]->returnAddressType);
+        self::assertSame(ReturnAddressType::POSTOFFICE_ADDRESS, $result[0]->getReturnAddressType());
         self::assertFalse($result[0]->temporary);
         self::assertTrue($result[0]->vsdEnabled);
     }

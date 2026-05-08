@@ -16,9 +16,14 @@ final readonly class Batch
         public ?string $sendingDate = null,
         public ?int $count = null,
         public ?int $weight = null,
-        public ?BatchStatus $status = null,
+        public ?string $status = null,
         public ?bool $isLocal = null,
     ) {}
+
+    public function getStatus(): ?BatchStatus
+    {
+        return $this->status !== null ? BatchStatus::tryFrom($this->status) : null;
+    }
 
     /**
      * @return array<string,mixed>
@@ -40,7 +45,7 @@ final readonly class Batch
             $data['weight'] = $this->weight;
         }
         if ($this->status !== null) {
-            $data['status'] = $this->status->value;
+            $data['status'] = $this->status;
         }
         if ($this->isLocal !== null) {
             $data['is-local'] = $this->isLocal;
@@ -59,7 +64,7 @@ final readonly class Batch
             sendingDate: $data['sending-date'] ?? null,
             count: $data['count'] ?? null,
             weight: $data['weight'] ?? null,
-            status: isset($data['status']) ? BatchStatus::tryFrom($data['status']) : null,
+            status: $data['status'] ?? null,
             isLocal: $data['is-local'] ?? null,
         );
     }

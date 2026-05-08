@@ -22,7 +22,7 @@ final class ShippingPoint
         public readonly ?bool $isAgreement = null,
         public readonly ?string $opsAddress = null,
         public readonly ?bool $prePostalPreparation = null,
-        public readonly ?ReturnAddressType $returnAddressType = null,
+        public readonly ?string $returnAddressType = null,
         public readonly ?bool $temporary = null,
         /** @var string[]|null */
         public readonly ?array $userAvailableMailTypes = null,
@@ -32,6 +32,11 @@ final class ShippingPoint
         public readonly ?array $userReturnAddress = null,
         public readonly ?bool $vsdEnabled = null,
     ) {}
+
+    public function getReturnAddressType(): ?ReturnAddressType
+    {
+        return $this->returnAddressType !== null ? ReturnAddressType::tryFrom($this->returnAddressType) : null;
+    }
 
     /** @param array<string,mixed> $data */
     public static function fromArray(array $data): self
@@ -47,9 +52,7 @@ final class ShippingPoint
             isAgreement: $data['is-agreement'] ?? null,
             opsAddress: $data['ops-address'] ?? null,
             prePostalPreparation: $data['pre-postal-preparation'] ?? null,
-            returnAddressType: isset($data['return-address-type'])
-                ? ReturnAddressType::tryFrom($data['return-address-type'])
-                : null,
+            returnAddressType: $data['return-address-type'] ?? null,
             temporary: $data['temporary'] ?? null,
             userAvailableMailTypes: $data['user-available-mail-types'] ?? null,
             userAvailableProducts: $data['user-available-products'] ?? null,
@@ -94,7 +97,7 @@ final class ShippingPoint
             $result['pre-postal-preparation'] = $this->prePostalPreparation;
         }
         if ($this->returnAddressType !== null) {
-            $result['return-address-type'] = $this->returnAddressType->value;
+            $result['return-address-type'] = $this->returnAddressType;
         }
         if ($this->temporary !== null) {
             $result['temporary'] = $this->temporary;

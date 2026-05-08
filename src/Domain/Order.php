@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace SergeR\RussianPostSDK\Domain;
 
 use SergeR\RussianPostSDK\Dto\Request\{Address, Dimension, CustomsDeclaration, Goods, EcomData, FiscalData, PaymentDetails};
-use SergeR\RussianPostSDK\Enums\{MailType, MailCategory, AddressType};
+use SergeR\RussianPostSDK\Enums\{MailType, MailCategory};
 
 /**
  * Доменная модель заказа (посылки) для Russian Post API.
@@ -23,8 +23,8 @@ final readonly class Order
         public ?bool $isDeleted = null,
 
         // Основные параметры отправления
-        public ?MailType $mailType = null,
-        public ?MailCategory $mailCategory = null,
+        public ?string $mailType = null,
+        public ?string $mailCategory = null,
         public ?string $envelopeType = null,
         public ?int $mass = null,
 
@@ -217,6 +217,16 @@ final readonly class Order
         public ?array $postmarks = null,
     ) {}
 
+    public function getMailType(): ?MailType
+    {
+        return $this->mailType !== null ? MailType::tryFrom($this->mailType) : null;
+    }
+
+    public function getMailCategory(): ?MailCategory
+    {
+        return $this->mailCategory !== null ? MailCategory::tryFrom($this->mailCategory) : null;
+    }
+
     /**
      * Преобразует Order в массив для отправки в API.
      * Null значения исключаются.
@@ -231,10 +241,10 @@ final readonly class Order
             $data['order-num'] = $this->orderNum;
         }
         if ($this->mailType !== null) {
-            $data['mail-type'] = $this->mailType->value;
+            $data['mail-type'] = $this->mailType;
         }
         if ($this->mailCategory !== null) {
-            $data['mail-category'] = $this->mailCategory->value;
+            $data['mail-category'] = $this->mailCategory;
         }
         if ($this->mass !== null) {
             $data['mass'] = $this->mass;
@@ -449,8 +459,8 @@ final readonly class Order
             barcode: $data['barcode'] ?? null,
             innerNum: $data['inner-num'] ?? null,
             isDeleted: $data['is-deleted'] ?? null,
-            mailType: isset($data['mail-type']) ? MailType::tryFrom($data['mail-type']) : null,
-            mailCategory: isset($data['mail-category']) ? MailCategory::tryFrom($data['mail-category']) : null,
+            mailType: $data['mail-type'] ?? null,
+            mailCategory: $data['mail-category'] ?? null,
             envelopeType: $data['envelope-type'] ?? null,
             mass: $data['mass'] ?? null,
             addressTo: isset($data['address-to']) ? Address::fromArray($data['address-to']) : null,

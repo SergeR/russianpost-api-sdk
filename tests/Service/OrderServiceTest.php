@@ -53,8 +53,10 @@ final class OrderServiceTest extends TestCase
         self::assertSame(123, $order->id);
         self::assertSame('Иван Иванов', $order->recipientName);
         self::assertSame(500, $order->mass);
-        self::assertSame(MailType::ONLINE_PARCEL, $order->mailType);
-        self::assertSame(MailCategory::SIMPLE, $order->mailCategory);
+        self::assertSame('ONLINE_PARCEL', $order->mailType);
+        self::assertSame('SIMPLE', $order->mailCategory);
+        self::assertSame(MailType::ONLINE_PARCEL, $order->getMailType());
+        self::assertSame(MailCategory::SIMPLE, $order->getMailCategory());
     }
 
     public function testCreateSendsPutRequest(): void
@@ -70,8 +72,8 @@ final class OrderServiceTest extends TestCase
 
         $order = new Order(
             orderNum: 'ORDER-001',
-            mailType: MailType::POSTAL_PARCEL,
-            mailCategory: MailCategory::SIMPLE,
+            mailType: MailType::POSTAL_PARCEL->value,
+            mailCategory: MailCategory::SIMPLE->value,
             mass: 1000,
             addressTo: $this->createMockAddress(),
             recipientName: 'Test',
@@ -90,7 +92,7 @@ final class OrderServiceTest extends TestCase
         $result = $this->client->orders()->create($order);
 
         self::assertSame(456, $result->id);
-        self::assertSame(MailType::POSTAL_PARCEL, $result->mailType);
+        self::assertSame('POSTAL_PARCEL', $result->mailType);
     }
 
     public function testDeleteSendsDeleteRequest(): void
