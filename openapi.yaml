@@ -2589,6 +2589,30 @@ components:
           description: Текущее количество запросов
           minimum: 0
 
+    UserShippingPointProduct:
+      type: object
+      description: Доступный продукт точки сдачи
+      additionalProperties: false
+      properties:
+        mail-category:
+          type: string
+          description: Категория РПО
+        mail-type:
+          type: string
+          description: Вид РПО
+        product-type:
+          type: string
+          description: Тип продукта
+
+    UserReturnAddress:
+      type: object
+      description: Адрес возврата пользователя
+      additionalProperties: true
+      properties:
+        manual-address-input:
+          type: boolean
+          description: Ручной ввод адреса
+
     UserShippingPointItem:
       type: object
       description: Точка сдачи отправлений
@@ -2596,15 +2620,66 @@ components:
         - operator-postcode
       additionalProperties: false
       properties:
-        enabled:
-          type: boolean
-          description: Активна
         operator-postcode:
           type: string
           description: Индекс ОПС обслуживания
+        additional-operator-postcode:
+          type: string
+          description: Дополнительный индекс ОПС
+        additional-operator-postcodes:
+          type: array
+          description: Список дополнительных индексов ОПС
+          items:
+            type: string
+        available-mail-types:
+          type: array
+          description: Доступные виды РПО для данной точки сдачи
+          items:
+            type: string
+        available-products:
+          type: array
+          description: Доступные продукты для данной точки сдачи
+          items:
+            $ref: '#/components/schemas/UserShippingPointProduct'
+        courier-call:
+          type: boolean
+          description: Вызов курьера
+        enabled:
+          type: boolean
+          description: Активна
+        is-agreement:
+          type: boolean
+          description: Договор заключён
         ops-address:
           type: string
           description: Адрес ОПС
+        pre-postal-preparation:
+          type: boolean
+          description: Предварительная почтовая подготовка
+        return-address-type:
+          type: string
+          description: Тип адреса возврата
+          enum:
+            - POSTOFFICE_ADDRESS
+            - SPECIFIED_ADDRESS
+        temporary:
+          type: boolean
+          description: Временная точка сдачи
+        user-available-mail-types:
+          type: array
+          description: Виды РПО, доступные пользователю
+          items:
+            type: string
+        user-available-products:
+          type: array
+          description: Продукты, доступные пользователю
+          items:
+            $ref: '#/components/schemas/UserShippingPointProduct'
+        user-return-address:
+          $ref: '#/components/schemas/UserReturnAddress'
+        vsd-enabled:
+          type: boolean
+          description: ВСД включён
 
     UserShippingPointsResponse:
       type: array

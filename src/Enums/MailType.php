@@ -15,4 +15,10 @@ enum MailType: string
     case EMS_TENDER = 'EMS_TENDER';
     case LETTER = 'LETTER';
     case LETTER_CLASS_1 = 'LETTER_CLASS_1';
+    case SMALL_PACKET = 'SMALL_PACKET';
+    case PARCEL_CLASS_1 = 'PARCEL_CLASS_1';
+    case ECOM_MARKETPLACE = 'ECOM_MARKETPLACE';
+    case BANDEROL = 'BANDEROL';
+    case BANDEROL_CLASS_1 = 'BANDEROL_CLASS_1';
+    case BANDEROL_KIT = 'BANDEROL_KIT';
 }

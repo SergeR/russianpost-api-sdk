@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace SergeR\RussianPostSDK\Service;
 
+use SergeR\RussianPostSDK\Domain\ShippingPoint;
 use SergeR\RussianPostSDK\Http\HttpTransport;
 
 final class UtilityService
@@ -61,11 +62,16 @@ final class UtilityService
 
     /**
      * Get user shipping points
-     * @return array<mixed>
+     * @return ShippingPoint[]
      */
     public function getShippingPoints(): array
     {
-        return $this->transport->send('GET', '/1.0/user-shipping-points');
+        $data = $this->transport->send('GET', '/1.0/user-shipping-points');
+
+        return array_map(
+            static fn(array $item) => ShippingPoint::fromArray($item),
+            $data,
+        );
     }
 
     /**
