@@ -4235,7 +4235,7 @@ paths:
         '401':
           $ref: '#/components/responses/Unauthorized'
 
-  /1.0/shipping-points:
+  /1.0/user-shipping-points:
     get:
       tags:
         - utility
